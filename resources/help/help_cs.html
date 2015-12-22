@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta http-equiv="content-language" content="cs" />
+<meta name="qrichtext" content="1" />
+<style type="text/css">
+    p, li {white-space: normal;}
+    div.picture p {padding: 10px; font-style: italic; text-align: center;}
+</style>
+</head>
+<body style=" font-family:'Cantarell'; font-size:11pt; font-weight:400; font-style:normal;">
+
+<h1>Nápověda</h1>
+<h2>Obsah</h2>
+<ul>
+    <li><a href="#ch-basic">Základní ovládání aplikace</a></li>
+    <ul>
+        <li><a href="#sec-connect">Připojení zařízení</a></li>
+        <li><a href="#sec-grafy">Ovládání grafů</a></li>
+    </ul>
+    <li><a href="#ch-oscilloscope">Ovládání osciloskopu</a></li>
+    <ul>
+        <li><a href="#sec-spectrum">Zobrazení spektra</a></li>
+    </ul>
+</ul>
+
+<h2 id="ch-basic">Základní ovládání aplikace</h2>
+<p>Aplikace se skládá z několika nezávislích modulů.
+Každý modul se otevírá s hlavního okna aplikace.
+Zavření okna daného modulu pouze skryje uživatelské rozhraní,
+ale modul stále běží na pozadí.</p>
+
+<div class="picture">
+<img src="img/app_intro.png" />
+<p>Hlavní okno aplikace</p>
+</div>
+
+<h3 id="sec-connect">Připojení zařízení</h3>
+<p>Připojení zařízení se provádí v hlavním okně aplikace.
+V pravém sloupci je seznam dostupných portů, který
+je možné aktualizovat pomocí tlačítka &quot;Refresh&quot;</p>
+<p>Po úspěšném připojení by se měl objevit název připojeného zařízení</a>
+
+<h3 id="sec-plots">Ovládání grafů</h3>
+<p>Většina měřících modulů používá pro zobrazní dat grafy.
+Grafy je možné přiblížit pomocí výběru pravým tlačítkem myši.
+Kliknutím pravého tlačítka myši se zobrazí kontextové menu aplikace,
+které umožňuje nastavit výchozí přiblížení, zobrazit/schovat body na křivkách grafu
+a exportovat naměřená data do textového souboru.
+Pomocí levého tlačítka myši je možná graf posouvat.</p>
+
+<h2 id="ch-oscilloscope">Ovládání osciloskopu</h2>
+<p>Uživatelské rozhraní osciloskopu se skládá z několika částí.
+Hlavní součástí je <a href="#sec-plots">graf</a>, který zobrazuje aktuální data.
+Červené úsečky ukazují úroveň a okamžik triggeru.
+V pravé části je pak sloupec, který obsahuje dvě záložky:
+&quot;Control&quot; (ovládání) a &quot;Measurement&quot; (měření).
+</p>
+
+<div class="picture">
+<img src="img/osc_app.png" />
+<p>Uživatelské rozhraní osciloskopu</p>
+</div>
+
+<p>Záložka &quot;Control&quot; slouží k nastavení klíčových parametrů
+osciloskopu. Lze zde nastavit úroveň triggeru, jeho pozici
+a zda trigger reaguje na sestupnou, náběžnou, nebo obě hrany.
+Také možné nastavit tzv. &quot;Auto-trigger&quot;, kdy
+se zázname spouští ihned. Toto nastavení využijeme především
+pokud nevíme jaký signál sledujeme.</p>
+
+<p>Záložka &quot;Measurement&quot; slouží k zobrazení naměřených statistik.
+Také zde najdeme možnost zobrazit spektrum signálu (tlačítko &quot;Show spectrum&quot;)
+a vývoj střední hodnoty mezi jednotlivými průběhy.</p>
+
+<h3 id="sec-spectrum">Zobrazení spektra</h3>
+<div class="picture">
+<img src="img/spec_app.png" />
+<p>Zobrazení spektra</p>
+</div>
+
+</body>
+</html>

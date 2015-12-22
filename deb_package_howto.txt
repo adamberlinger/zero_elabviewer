@@ -1,0 +1,24 @@
+Short guide on how to create Debian package. It is not complete 100% correct guide.
+
+  - copy source file to `~/<package_name>-<version>` folder
+  - add following to `*.pro` file:
+
+```
+binfile.files+=zero_elabviewer
+binfile.path=/usr/bin
+
+INSTALLS += binfile
+```
+
+ - run `dh_make -s -c gpl -e <author_mail> --createorig` inside
+`~/<package_name>-<version>` folder
+ - modify debian/rules file (requires "cdbs" package):
+
+```
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/qmake.mk
+```
+
+ - run "dpkg-buildpackage"
