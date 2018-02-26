@@ -56,9 +56,9 @@ VoltmeterWidget::VoltmeterWidget(Protocol* protocol,int channel, DataConverter* 
 
     QObject::connect (averageSamples, SIGNAL(valueChangedDelayed(float)), this, SLOT(configureNumSamples(float)));
 
-    recordWidget = new RecordWidget("Average voltage - voltmeter","Voltage",true,5.0);
+    recordWidget = new MultiRecordWidget("Average voltage - voltmeter","Voltage",true,5.0);
     recordWidget->setWindowTitle("Average Voltage");
-    QObject::connect (this, SIGNAL(yieldVoltage(float,float)), recordWidget, SLOT(record(float,float)));
+    //QObject::connect (this, SIGNAL(yieldVoltage(float,float)), recordWidget, SLOT(recordSimple(float)));
     QObject::connect (showRecordButton, SIGNAL(pressed()), recordWidget, SLOT(show()));
 
     responseMeasurement = new ResponseMeasurement("DC analysis","Voltage (V)","Voltage (V)","V","V");
@@ -124,6 +124,12 @@ void VoltmeterWidget::displayData(){
 
         diffVoltageLabel1->setText(QString("V2 - V1: %1V").arg(voltages[4],7,'f',3));
         diffVoltageLabel2->setText(QString("V3 - V2: %1V").arg(voltages[5],7,'f',3));
+
+        recordWidget->recordPrepare(rawData[0] * 0.01f);
+        for(int i = 0;i < 4;++i){
+            recordWidget->record(voltages[i],i);
+        }
+        recordWidget->recordSubmit();
 
         yieldVoltage(voltages[recordIndex], rawData[0] * 0.01f);
     }

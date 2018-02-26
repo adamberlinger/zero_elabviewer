@@ -52,7 +52,7 @@ protected:
     QPushButton* showRecordButton;
     QPushButton* showDCButton;
 
-    RecordWidget* recordWidget;
+    MultiRecordWidget* recordWidget;
     ResponseMeasurement* responseMeasurement;
 public slots:
     void startVoltmeter();

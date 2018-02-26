@@ -60,4 +60,51 @@ public:
     virtual ~RecordWidget();
 };
 
+class MultiRecordWidget : public QWidget {
+    Q_OBJECT
+protected:
+    struct Channel {
+        QVector<double> dataX,dataY;
+        QCPGraph *graph;
+        Channel(){graph = NULL;}
+    };
+    QBoxLayout* mainLayout;
+    QBoxLayout* controlLayout;
+    QWidget* sidePanel;
+    QPushButton* startButton;
+    QPushButton* stopButton;
+    QPushButton* clearButton;
+    QHash<int,Channel> channels;
+    QElapsedTimer timer;
+
+    ExtendedPlot* plot;
+    double min,max;
+    double recordWidth;
+    bool running;
+    bool recordActive;
+    bool hideOnClose;
+    bool minMaxInitialized;
+
+    double recordTime;
+
+    QLabel* noiseLevelLabel;
+    QPushButton* noiseLevelButton;
+
+    virtual void closeEvent(QCloseEvent *event);
+private slots:
+    void startRecording();
+    void stopRecording();
+    void clearRecord();
+    void computeNoise();
+public slots:
+    void recordSimple(float value);
+    void recordPrepare();
+    void recordPrepare(float time);
+    void record(float value, int slot);
+    void recordSubmit();
+public:
+    MultiRecordWidget(QString caption, QString yAxisLabel,bool hideOnClose, double recordWidth = 5.0);
+    virtual ~MultiRecordWidget();
+};
+
 #endif /*  _RECORD_WIDGET_H_ */
