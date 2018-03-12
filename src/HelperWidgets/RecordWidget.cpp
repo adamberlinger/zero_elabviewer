@@ -165,10 +165,37 @@ void RecordWidget::closeEvent(QCloseEvent *event){
 RecordWidget::~RecordWidget(){
 }
 
-MultiRecordWidget::MultiRecordWidget(QString caption, QString yAxisLabel, bool hideOnClose,double recordWidth){
+MultiRecordWidgetChannel::MultiRecordWidgetChannel(MultiRecordWidget* parent, ExtendedPlot* plot,
+    int slot, bool visibility):QObject(parent){
+    graph = plot->addGraph();
+    toggle = new QAction("", this);
+    toggle->setCheckable(true);
+    toggle->setChecked(visibility);
+    graph->setVisible(visibility);
+
+    this->slot = slot;
+    this->parent = parent;
+
+    QObject::connect(toggle, SIGNAL(triggered(bool)), this, SLOT(toggleVisibility(bool)));
+}
+
+MultiRecordWidgetChannel::~MultiRecordWidgetChannel(){
+    if(toggle){
+        delete toggle;
+    }
+}
+
+void MultiRecordWidgetChannel::toggleVisibility(bool value){
+    graph->setVisible(value);
+    parent->setChannelVisibility(slot, value);
+}
+
+MultiRecordWidget::MultiRecordWidget(QString caption, QString yAxisLabel,
+    bool hideOnClose,double recordWidth, uint32_t fixedChannels){
     this->setLayout(mainLayout = new QHBoxLayout());
     this->hideOnClose = hideOnClose;
     this->recordWidth = recordWidth;
+    this->fixedChannels = fixedChannels;
     plot = new ExtendedPlot(this);
 
     plot->xAxis->setLabel("Time (s)");
@@ -217,6 +244,22 @@ MultiRecordWidget::MultiRecordWidget(QString caption, QString yAxisLabel, bool h
     QObject::connect (stopButton, SIGNAL(pressed()), this, SLOT(stopRecording()));
     QObject::connect (clearButton, SIGNAL(pressed()), this, SLOT(clearRecord()));
     QObject::connect (noiseLevelButton, SIGNAL(pressed()), this, SLOT(computeNoise()));
+
+    channelMenu = new QMenu(tr("Channels"),plot);
+    plot->getContextMenu()->addMenu(channelMenu);
+    hideChannelMask = 0;
+
+    if(fixedChannels > 0){
+        for(int slot = 0;slot < fixedChannels;++slot){
+            MultiRecordWidgetChannel* &activeChannel = channels[slot];
+            if(activeChannel == NULL){
+                bool visiblity =  (slot >= 0 && slot < 32)?(!(hideChannelMask & (1 << slot))):true;
+                activeChannel = new MultiRecordWidgetChannel(this, plot, slot,visiblity);
+                activeChannel->toggle->setText(QString("Channel %1").arg(slot));
+                channelMenu->addAction(activeChannel->toggle);
+            }
+        }
+    }
 }
 
 void MultiRecordWidget::computeNoise(){
@@ -264,9 +307,14 @@ void MultiRecordWidget::stopRecording(){
     running = false;
 }
 void MultiRecordWidget::clearRecord(){
+    if(fixedChannels == 0){
+        for(auto it = channels.begin();it != channels.end();it++){
+            delete it.value();
+        }
+    }
     channels.clear();
     plot->clearGraphs();
-    plot->resetZoom(0.0,0.0,100.0,3.3);
+    plot->resetZoom(0.0,0.0,this->recordWidth,3.3);
     plot->removeAllCursors();
     plot->replot();
     min = 0;
@@ -303,7 +351,22 @@ void MultiRecordWidget::recordPrepare(float time){
     }
 }
 
+void MultiRecordWidget::setChannelVisibility(int slot,bool value){
+    if(slot < 32 && slot >= 0){
+        uint32_t mask = (0x1) << slot;
+        if(value){
+            hideChannelMask &= ~mask;
+        }
+        else {
+            hideChannelMask |= mask;
+        }
+    }
+}
+
 void MultiRecordWidget::record(float value, int slot){
+    if(fixedChannels && (slot < 0 || slot >= fixedChannels))
+        return;
+
     if(!running)
         return;
 
@@ -317,17 +380,20 @@ void MultiRecordWidget::record(float value, int slot){
     }
 
     /* Intentional creation if slot doesn't exist */
-    Channel &activeChannel = channels[slot];
-    if(activeChannel.graph == NULL){
-        activeChannel.graph = plot->addGraph();
+    MultiRecordWidgetChannel* &activeChannel = channels[slot];
+    if(activeChannel == NULL){
+        bool visiblity =  (slot >= 0 && slot < 32)?(!(hideChannelMask & (1 << slot))):true;
+        activeChannel = new MultiRecordWidgetChannel(this, plot, slot,visiblity);
+        activeChannel->toggle->setText(QString("Channel %1").arg(slot));
+        channelMenu->addAction(activeChannel->toggle);
     }
-    activeChannel.dataX.push_back(recordTime);
-    activeChannel.dataY.push_back(value);
-    if(activeChannel.dataX.size() > (MAX_SAMPLES + 1000)){
-        activeChannel.dataX.erase(activeChannel.dataX.begin(),activeChannel.dataX.begin()+1000);
-        activeChannel.dataY.erase(activeChannel.dataY.begin(),activeChannel.dataY.begin()+1000);
+    activeChannel->dataX.push_back(recordTime);
+    activeChannel->dataY.push_back(value);
+    if(activeChannel->dataX.size() > (MAX_SAMPLES + 1000)){
+        activeChannel->dataX.erase(activeChannel->dataX.begin(),activeChannel->dataX.begin()+1000);
+        activeChannel->dataY.erase(activeChannel->dataY.begin(),activeChannel->dataY.begin()+1000);
     }
-    activeChannel.graph->setData(activeChannel.dataX,activeChannel.dataY);
+    activeChannel->graph->setData(activeChannel->dataX,activeChannel->dataY);
 }
 
 void MultiRecordWidget::recordSubmit(){

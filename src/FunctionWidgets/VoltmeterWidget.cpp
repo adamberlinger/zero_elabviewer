@@ -45,10 +45,10 @@ VoltmeterWidget::VoltmeterWidget(Protocol* protocol,int channel, DataConverter* 
     mainLayout->addWidget(averageSamples);
     mainLayout->addWidget(startButton = new QPushButton("Start"));
     mainLayout->addWidget(stopButton = new QPushButton("Stop"));
-    mainLayout->addWidget(new QLabel("Recording source:"));
-    mainLayout->addWidget(recordSelect = new QComboBox());
     mainLayout->addWidget(showRecordButton = new QPushButton("Show recording"));
     mainLayout->addWidget(showDCButton = new QPushButton("Show DC analysis"));
+    mainLayout->addWidget(new QLabel("DC analysis source:"));
+    mainLayout->addWidget(recordSelect = new QComboBox());
 
     QObject::connect (protocol, SIGNAL(binaryReceived()), this, SLOT(displayData()));
     QObject::connect (startButton, SIGNAL(pressed()), this, SLOT(startVoltmeter()));
@@ -56,7 +56,7 @@ VoltmeterWidget::VoltmeterWidget(Protocol* protocol,int channel, DataConverter* 
 
     QObject::connect (averageSamples, SIGNAL(valueChangedDelayed(float)), this, SLOT(configureNumSamples(float)));
 
-    recordWidget = new MultiRecordWidget("Average voltage - voltmeter","Voltage",true,5.0);
+    recordWidget = new MultiRecordWidget("Average voltage - voltmeter","Voltage",true,5.0,4);
     recordWidget->setWindowTitle("Average Voltage");
     //QObject::connect (this, SIGNAL(yieldVoltage(float,float)), recordWidget, SLOT(recordSimple(float)));
     QObject::connect (showRecordButton, SIGNAL(pressed()), recordWidget, SLOT(show()));

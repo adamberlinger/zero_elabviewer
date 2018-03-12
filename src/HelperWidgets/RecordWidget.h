@@ -60,22 +60,35 @@ public:
     virtual ~RecordWidget();
 };
 
+class MultiRecordWidget;
+
+class MultiRecordWidgetChannel : public QObject {
+    Q_OBJECT
+public:
+    QVector<double> dataX,dataY;
+    QCPGraph *graph;
+    QAction* toggle;
+    MultiRecordWidget* parent;
+    int slot;
+    MultiRecordWidgetChannel(MultiRecordWidget* parent, ExtendedPlot* plot,
+        int slot, bool visibility);
+    ~MultiRecordWidgetChannel();
+public slots:
+    void toggleVisibility(bool value);
+};
+
 class MultiRecordWidget : public QWidget {
     Q_OBJECT
 protected:
-    struct Channel {
-        QVector<double> dataX,dataY;
-        QCPGraph *graph;
-        Channel(){graph = NULL;}
-    };
     QBoxLayout* mainLayout;
     QBoxLayout* controlLayout;
     QWidget* sidePanel;
     QPushButton* startButton;
     QPushButton* stopButton;
     QPushButton* clearButton;
-    QHash<int,Channel> channels;
+    QHash<int,MultiRecordWidgetChannel*> channels;
     QElapsedTimer timer;
+    QMenu* channelMenu;
 
     ExtendedPlot* plot;
     double min,max;
@@ -86,6 +99,8 @@ protected:
     bool minMaxInitialized;
 
     double recordTime;
+    uint32_t hideChannelMask;
+    uint32_t fixedChannels;
 
     QLabel* noiseLevelLabel;
     QPushButton* noiseLevelButton;
@@ -103,8 +118,9 @@ public slots:
     void record(float value, int slot);
     void recordSubmit();
 public:
-    MultiRecordWidget(QString caption, QString yAxisLabel,bool hideOnClose, double recordWidth = 5.0);
+    MultiRecordWidget(QString caption, QString yAxisLabel,bool hideOnClose, double recordWidth = 5.0, uint32_t fixedChannels = 0);
     virtual ~MultiRecordWidget();
+    void setChannelVisibility(int slot,bool value);
 };
 
 #endif /*  _RECORD_WIDGET_H_ */
