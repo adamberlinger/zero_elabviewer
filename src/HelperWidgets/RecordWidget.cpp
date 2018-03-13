@@ -16,7 +16,7 @@
  */
 #include "RecordWidget.h"
 
-#define MAX_SAMPLES     (10000)
+#define MAX_SAMPLES     (1000)
 
 RecordWidget::RecordWidget(QString caption, QString yAxisLabel, bool hideOnClose,double recordWidth){
     this->setLayout(mainLayout = new QHBoxLayout());
@@ -166,9 +166,10 @@ RecordWidget::~RecordWidget(){
 }
 
 MultiRecordWidgetChannel::MultiRecordWidgetChannel(MultiRecordWidget* parent, ExtendedPlot* plot,
-    int slot, bool visibility):QObject(parent){
+    int slot, bool visibility, QString name):QObject(parent){
     graph = plot->addGraph();
-    toggle = new QAction("", this);
+    toggle = new QAction(name, this);
+    showOnly = new QAction(name, this);
     toggle->setCheckable(true);
     toggle->setChecked(visibility);
     graph->setVisible(visibility);
@@ -177,6 +178,8 @@ MultiRecordWidgetChannel::MultiRecordWidgetChannel(MultiRecordWidget* parent, Ex
     this->parent = parent;
 
     QObject::connect(toggle, SIGNAL(triggered(bool)), this, SLOT(toggleVisibility(bool)));
+    QObject::connect(showOnly, SIGNAL(triggered()), this, SLOT(setShowOnly()));
+    graph->setPen(QPen(ExtendedPlot::graph_colors[slot % GRAPH_COLORS_SIZE]));
 }
 
 MultiRecordWidgetChannel::~MultiRecordWidgetChannel(){
@@ -188,6 +191,20 @@ MultiRecordWidgetChannel::~MultiRecordWidgetChannel(){
 void MultiRecordWidgetChannel::toggleVisibility(bool value){
     graph->setVisible(value);
     parent->setChannelVisibility(slot, value);
+    if(value != toggle->isChecked()){
+        toggle->setChecked(value);
+    }
+}
+
+void MultiRecordWidgetChannel::setShowOnly(){
+    parent->hideAll();
+    this->toggleVisibility(true);
+}
+
+void MultiRecordWidgetChannel::clearData(){
+    dataX.clear();
+    dataY.clear();
+    graph->setData(dataX,dataY);
 }
 
 MultiRecordWidget::MultiRecordWidget(QString caption, QString yAxisLabel,
@@ -245,20 +262,40 @@ MultiRecordWidget::MultiRecordWidget(QString caption, QString yAxisLabel,
     QObject::connect (clearButton, SIGNAL(pressed()), this, SLOT(clearRecord()));
     QObject::connect (noiseLevelButton, SIGNAL(pressed()), this, SLOT(computeNoise()));
 
-    channelMenu = new QMenu(tr("Channels"),plot);
+    channelMenu = new QMenu(tr("Channels visibility"),plot);
+    singleChannelMenu = new QMenu(tr("Show single channel"),plot);
+    showAllAction = new QAction(tr("Show all channels"), plot);
+    plot->getContextMenu()->addSeparator();
     plot->getContextMenu()->addMenu(channelMenu);
+    plot->getContextMenu()->addMenu(singleChannelMenu);
+    plot->getContextMenu()->addAction(showAllAction);
     hideChannelMask = 0;
+
+    QObject::connect (showAllAction, SIGNAL(triggered()), this, SLOT(showAll()));
 
     if(fixedChannels > 0){
         for(int slot = 0;slot < fixedChannels;++slot){
             MultiRecordWidgetChannel* &activeChannel = channels[slot];
             if(activeChannel == NULL){
                 bool visiblity =  (slot >= 0 && slot < 32)?(!(hideChannelMask & (1 << slot))):true;
-                activeChannel = new MultiRecordWidgetChannel(this, plot, slot,visiblity);
-                activeChannel->toggle->setText(QString("Channel %1").arg(slot));
+                activeChannel = new MultiRecordWidgetChannel(this, plot, slot,visiblity, QString("Channel %1").arg(slot));
+                //activeChannel->toggle->setText(Q);
                 channelMenu->addAction(activeChannel->toggle);
+                singleChannelMenu->addAction(activeChannel->showOnly);
             }
         }
+    }
+}
+
+void MultiRecordWidget::hideAll(){
+    for(auto it = channels.begin();it != channels.end();it++){
+        it.value()->toggleVisibility(false);
+    }
+}
+
+void MultiRecordWidget::showAll(){
+    for(auto it = channels.begin();it != channels.end();it++){
+        it.value()->toggleVisibility(true);
     }
 }
 
@@ -311,9 +348,14 @@ void MultiRecordWidget::clearRecord(){
         for(auto it = channels.begin();it != channels.end();it++){
             delete it.value();
         }
+        channels.clear();
+        plot->clearGraphs();
     }
-    channels.clear();
-    plot->clearGraphs();
+    else {
+        for(auto it = channels.begin();it != channels.end();it++){
+            it.value()->clearData();
+        }
+    }
     plot->resetZoom(0.0,0.0,this->recordWidth,3.3);
     plot->removeAllCursors();
     plot->replot();
@@ -383,9 +425,10 @@ void MultiRecordWidget::record(float value, int slot){
     MultiRecordWidgetChannel* &activeChannel = channels[slot];
     if(activeChannel == NULL){
         bool visiblity =  (slot >= 0 && slot < 32)?(!(hideChannelMask & (1 << slot))):true;
-        activeChannel = new MultiRecordWidgetChannel(this, plot, slot,visiblity);
-        activeChannel->toggle->setText(QString("Channel %1").arg(slot));
+        activeChannel = new MultiRecordWidgetChannel(this, plot, slot,visiblity, QString("Channel %1").arg(slot));
+        //activeChannel->toggle->setText();
         channelMenu->addAction(activeChannel->toggle);
+        singleChannelMenu->addAction(activeChannel->showOnly);
     }
     activeChannel->dataX.push_back(recordTime);
     activeChannel->dataY.push_back(value);

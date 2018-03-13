@@ -18,10 +18,9 @@
 #include <iostream>
 #include <cmath>
 
-#define GRAPH_COLORS_SIZE   (3)
-
-static const QColor graph_colors[GRAPH_COLORS_SIZE] = {
+const QColor ExtendedPlot::graph_colors[GRAPH_COLORS_SIZE] = {
     Qt::blue, QColor(0,128,0), QColor(128,0,128),
+    QColor(128,0,0)
 };
 
 const double ExtendedPlot::Cursor::big_double = 10000.0;

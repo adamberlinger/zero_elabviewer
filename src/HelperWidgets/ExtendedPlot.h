@@ -20,9 +20,12 @@
 #include "qcustomplot.h"
 #include "DataSet.h"
 
+#define GRAPH_COLORS_SIZE   (4)
+
 class ExtendedPlot : public QCustomPlot {
     Q_OBJECT
 public:
+    static const QColor graph_colors[GRAPH_COLORS_SIZE];
     typedef double (*conv_double_callback_t)(double);
 
     class Cursor;
