@@ -74,10 +74,13 @@ public:
     MultiRecordWidgetChannel(MultiRecordWidget* parent, ExtendedPlot* plot,
         int slot, bool visibility, QString name);
     ~MultiRecordWidgetChannel();
+    double offset;
 public slots:
     void toggleVisibility(bool value);
     void setShowOnly();
     void clearData();
+public:
+    void setOffset(double value);
 };
 
 class MultiRecordWidget : public QWidget {
@@ -94,6 +97,7 @@ protected:
     QMenu* channelMenu;
     QMenu* singleChannelMenu;
     QAction* showAllAction;
+    QAction* offsetChannelsAction;
 
     ExtendedPlot* plot;
     double min,max;
@@ -124,6 +128,7 @@ public slots:
     void recordSubmit();
     void showAll();
     void hideAll();
+    void enableOffset(bool value);
 public:
     MultiRecordWidget(QString caption, QString yAxisLabel,bool hideOnClose, double recordWidth = 5.0, uint32_t fixedChannels = 0);
     virtual ~MultiRecordWidget();

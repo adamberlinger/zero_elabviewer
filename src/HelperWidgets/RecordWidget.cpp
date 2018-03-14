@@ -176,6 +176,7 @@ MultiRecordWidgetChannel::MultiRecordWidgetChannel(MultiRecordWidget* parent, Ex
 
     this->slot = slot;
     this->parent = parent;
+    offset = 0.0;
 
     QObject::connect(toggle, SIGNAL(triggered(bool)), this, SLOT(toggleVisibility(bool)));
     QObject::connect(showOnly, SIGNAL(triggered()), this, SLOT(setShowOnly()));
@@ -186,6 +187,16 @@ MultiRecordWidgetChannel::~MultiRecordWidgetChannel(){
     if(toggle){
         delete toggle;
     }
+}
+
+
+void MultiRecordWidgetChannel::setOffset(double value){
+    double diff = value - offset;
+    offset = value;
+    for(int i = 0;i < dataY.size();++i){
+        dataY[i] += diff;
+    }
+    graph->setData(dataX,dataY);
 }
 
 void MultiRecordWidgetChannel::toggleVisibility(bool value){
@@ -265,13 +276,17 @@ MultiRecordWidget::MultiRecordWidget(QString caption, QString yAxisLabel,
     channelMenu = new QMenu(tr("Channels visibility"),plot);
     singleChannelMenu = new QMenu(tr("Show single channel"),plot);
     showAllAction = new QAction(tr("Show all channels"), plot);
+    offsetChannelsAction = new QAction(tr("Offset channels"), plot);
+    offsetChannelsAction->setCheckable(true);
     plot->getContextMenu()->addSeparator();
     plot->getContextMenu()->addMenu(channelMenu);
     plot->getContextMenu()->addMenu(singleChannelMenu);
     plot->getContextMenu()->addAction(showAllAction);
+    plot->getContextMenu()->addAction(offsetChannelsAction);
     hideChannelMask = 0;
 
     QObject::connect (showAllAction, SIGNAL(triggered()), this, SLOT(showAll()));
+    QObject::connect (offsetChannelsAction, SIGNAL(triggered(bool)), this, SLOT(enableOffset(bool)));
 
     if(fixedChannels > 0){
         for(int slot = 0;slot < fixedChannels;++slot){
@@ -343,6 +358,30 @@ void MultiRecordWidget::startRecording(){
 void MultiRecordWidget::stopRecording(){
     running = false;
 }
+
+void MultiRecordWidget::enableOffset(bool value){
+    /* TODO: improve behaviour for dynamic number of channels */
+    if(fixedChannels){
+        double offset = 0.0;
+        for(auto it = channels.begin();it != channels.end();it++){
+            if(value){
+                it.value()->setOffset(it.value()->slot * 4.0);
+            }
+            else {
+                it.value()->setOffset(0.0);
+            }
+        }
+
+        if(value){
+            plot->lazyZoomY(-0.1, 4.0 * fixedChannels);
+        }
+        else {
+            plot->lazyZoomY(min - 0.1, max + 0.1);
+        }
+        plot->replot();
+    }
+}
+
 void MultiRecordWidget::clearRecord(){
     if(fixedChannels == 0){
         for(auto it = channels.begin();it != channels.end();it++){
@@ -431,7 +470,7 @@ void MultiRecordWidget::record(float value, int slot){
         singleChannelMenu->addAction(activeChannel->showOnly);
     }
     activeChannel->dataX.push_back(recordTime);
-    activeChannel->dataY.push_back(value);
+    activeChannel->dataY.push_back(value + activeChannel->offset);
     if(activeChannel->dataX.size() > (MAX_SAMPLES + 1000)){
         activeChannel->dataX.erase(activeChannel->dataX.begin(),activeChannel->dataX.begin()+1000);
         activeChannel->dataY.erase(activeChannel->dataY.begin(),activeChannel->dataY.begin()+1000);
@@ -444,7 +483,12 @@ void MultiRecordWidget::recordSubmit(){
     if(recordTime > this->recordWidth){
         plot->lazyZoomX(recordTime-this->recordWidth, recordTime);
     }
-    plot->lazyZoomY(min - 0.1, max + 0.1);
+    if(fixedChannels == 0 || !offsetChannelsAction->isChecked()){
+        plot->lazyZoomY(min - 0.1, max + 0.1);
+    }
+    else {
+        plot->lazyZoomY(-0.1, 4.0 * fixedChannels + 0.1);
+    }
     plot->replot();
 }
 
