@@ -141,9 +141,9 @@ void RecordWidget::record(float value, float time){
     }
     dataX.push_back(x);
     dataY.push_back(value);
-    if(dataX.size() > (MAX_SAMPLES + 1000)){
-        dataX.erase(dataX.begin(),dataX.begin()+1000);
-        dataY.erase(dataY.begin(),dataY.begin()+1000);
+    if(dataX.size() > (MAX_SAMPLES*2)){
+        dataX.erase(dataX.begin(),dataX.begin()+MAX_SAMPLES);
+        dataY.erase(dataY.begin(),dataY.begin()+MAX_SAMPLES);
     }
     plot->graph(0)->setData(dataX,dataY);
     if(x > this->recordWidth){
@@ -181,6 +181,9 @@ MultiRecordWidgetChannel::MultiRecordWidgetChannel(MultiRecordWidget* parent, Ex
     QObject::connect(toggle, SIGNAL(triggered(bool)), this, SLOT(toggleVisibility(bool)));
     QObject::connect(showOnly, SIGNAL(triggered()), this, SLOT(setShowOnly()));
     graph->setPen(QPen(ExtendedPlot::graph_colors[slot % GRAPH_COLORS_SIZE]));
+
+    dataX.reserve(MAX_SAMPLES);
+    dataY.reserve(MAX_SAMPLES);
 }
 
 MultiRecordWidgetChannel::~MultiRecordWidgetChannel(){
@@ -471,9 +474,9 @@ void MultiRecordWidget::record(float value, int slot){
     }
     activeChannel->dataX.push_back(recordTime);
     activeChannel->dataY.push_back(value + activeChannel->offset);
-    if(activeChannel->dataX.size() > (MAX_SAMPLES + 1000)){
-        activeChannel->dataX.erase(activeChannel->dataX.begin(),activeChannel->dataX.begin()+1000);
-        activeChannel->dataY.erase(activeChannel->dataY.begin(),activeChannel->dataY.begin()+1000);
+    if(activeChannel->dataX.size() > (MAX_SAMPLES*2)){
+        activeChannel->dataX.erase(activeChannel->dataX.begin(),activeChannel->dataX.begin()+MAX_SAMPLES);
+        activeChannel->dataY.erase(activeChannel->dataY.begin(),activeChannel->dataY.begin()+MAX_SAMPLES);
     }
     activeChannel->graph->setData(activeChannel->dataX,activeChannel->dataY);
 }
