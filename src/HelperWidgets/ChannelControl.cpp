@@ -16,7 +16,7 @@
  */
 #include "ChannelControl.h"
 
-ChannelControl::ChannelControl(int numChannels){
+ChannelControl::ChannelControl(int numChannels,uint32_t channelMask){
     this->numChannels = numChannels;
 
     this->setLayout(layout = new QGridLayout());
@@ -28,7 +28,9 @@ ChannelControl::ChannelControl(int numChannels){
         layout->addWidget(channelEnable[i] = new QCheckBox(QString("Channel %1").arg(i+1)),i,0);
         layout->addWidget(channelTrigger[i] = new QRadioButton("Trigger"),i,1);
         triggerButtonGroup->addButton(channelTrigger[i],i);
-        channelEnable[i]->setChecked(true);
+        if(channelMask & (0x1 << i)){
+            channelEnable[i]->setChecked(true);
+        }
         QObject::connect(channelEnable[i], SIGNAL(clicked()), this, SLOT(checkBoxEvent()));
     }
     channelTrigger[0]->setChecked(true);
@@ -37,14 +39,18 @@ ChannelControl::ChannelControl(int numChannels){
     QObject::connect(triggerButtonGroup, SIGNAL(buttonPressed(int)), this, SLOT(radioButtonEvent(int)));
 }
 
-void ChannelControl::checkBoxEvent(){
+uint32_t ChannelControl::getActiveChannelMask(){
     uint32_t channelMask = 0;
     for(int i = 0; i < numChannels;++i){
         if(channelEnable[i]->isChecked()){
             channelMask |= (0x1 << i);
         }
     }
-    changedActiveChannels(channelMask);
+    return channelMask;
+}
+
+void ChannelControl::checkBoxEvent(){
+    changedActiveChannels(getActiveChannelMask());
 }
 
 void ChannelControl::radioButtonEvent(int channel){

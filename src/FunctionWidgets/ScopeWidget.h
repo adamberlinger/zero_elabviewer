@@ -37,6 +37,14 @@
 class ScopeWidget : public QMainWindow {
     Q_OBJECT
 protected:
+    enum RunState{
+        STOPPED = 0,
+        RUNNING = 1,
+        SINGLE = 2,
+    };
+
+    RunState runState;
+
     SignalMeasurement *signalMeasurement;
 
     QCPItemLine* vLineTrigger;
@@ -115,6 +123,7 @@ private slots:
     void configureTriggerChannel(int channel);
     void setChannelOffset(bool value);
     void openJSFile();
+    void singleTriggerToggle();
 public slots:
     void configureAll();
     void commandReceived();

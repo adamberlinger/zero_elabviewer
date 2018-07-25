@@ -40,7 +40,8 @@ protected slots:
     void radioButtonEvent(int channel);
     void checkBoxEvent();
 public:
-    ChannelControl(int numChannels);
+    ChannelControl(int numChannels,uint32_t channelMask);
+    uint32_t getActiveChannelMask();
     virtual ~ChannelControl();
 signals:
     void changedTriggerChannel(int channel);

@@ -96,7 +96,7 @@ ScopeWidget::ScopeWidget(Protocol* protocol, int channel, DataConverter* adcConv
 
     triggerControl = new SliderControl(QString("Trigger: %1 V"),1.5f,0.0f,3.3f,0.001f);
     sampleRateControl = new FrequencyControl(QString("Sample rate:"),1000.0f,true);
-    triggerPositionControl = new SliderControl(QString("Trigger position: %1 %"),50.0f,0.0f,100.0f,0.1f);
+    triggerPositionControl = new SliderControl(QString("Trigger position: %1 %"),15.0f,0.0f,100.0f,0.1f);
     bufferSizeControl = new SliderControl(QString("Buffer size: %1 #"),1024.0f,10.0f,16*1024.0f,1.0f);
     triggerStart = new QPushButton("Start");
     triggerStop = new QPushButton("Stop");
@@ -107,7 +107,7 @@ ScopeWidget::ScopeWidget(Protocol* protocol, int channel, DataConverter* adcConv
     controlLayout->addWidget(triggerFallingEdge = new QCheckBox("Falling edge"),row++,1,1,1);
     controlLayout->addWidget(autoTrigger = new QCheckBox("Auto trigger"),row,0,1,1);
     controlLayout->addWidget(singleTrigger = new QCheckBox("Single"),row++,1,1,1);
-    controlLayout->addWidget(channelControl = new ChannelControl(4),row++,0,1,2);
+    controlLayout->addWidget(channelControl = new ChannelControl(4,0x1),row++,0,1,2);
     controlLayout->addWidget(triggerStart,row,0,1,1);
     controlLayout->addWidget(triggerStop,row++,1,1,1);
     controlLayout->addWidget(triggerPositionControl,row++,0,1,2);
@@ -137,7 +137,7 @@ ScopeWidget::ScopeWidget(Protocol* protocol, int channel, DataConverter* adcConv
 
     statusPanel->setLayout(statusLayout = new QGridLayout());
     statusLayout->addWidget(maximumImpedanceLabel = new QLabel("Maximum input impedance: ? Ohms"));
-    
+
     jsResultTable->verticalHeader()->setVisible(false);
     jsResultTable->horizontalHeader()->setStretchLastSection(true);
     jsResultTable->horizontalHeader()->setVisible(false);
@@ -146,6 +146,7 @@ ScopeWidget::ScopeWidget(Protocol* protocol, int channel, DataConverter* adcConv
     QObject::connect (bufferSizeControl, SIGNAL(valueChangedDelayed(float)), this, SLOT(configureBufferSize(float)));
     QObject::connect (triggerControl, SIGNAL(valueChanged(float)), this, SLOT(repaintTrigger(float)));
     QObject::connect (triggerStart, SIGNAL(pressed()), this, SLOT(startOsc()));
+    QObject::connect (singleTrigger, SIGNAL(stateChanged(int)), this, SLOT(singleTriggerToggle()));
     QObject::connect (triggerStop, SIGNAL(pressed()), this, SLOT(stopOsc()));
     QObject::connect (triggerStart, SIGNAL(pressed()), runningIcon, SLOT(start()));
     QObject::connect (triggerStop, SIGNAL(pressed()), runningIcon, SLOT(stop()));
@@ -190,6 +191,13 @@ ScopeWidget::ScopeWidget(Protocol* protocol, int channel, DataConverter* adcConv
 
     dock->show();
     dock->raise();
+    runState = STOPPED;
+}
+
+void ScopeWidget::singleTriggerToggle(){
+    if(runState != STOPPED){
+        startOsc();
+    }
 }
 
 void ScopeWidget::commandReceived(){
@@ -237,6 +245,7 @@ void ScopeWidget::configureAll(){
     configureTriggerPosition(triggerPositionControl->getValue());
     configureSampleRate(sampleRateControl->getValue());
     configureTriggerPolarity(0);
+    configureChannels(channelControl->getActiveChannelMask());
 }
 
 void ScopeWidget::configureChannels(uint32_t channelMask){
@@ -299,21 +308,29 @@ void ScopeWidget::configureSampleRate(float value){
 void ScopeWidget::startOsc(){
     if(singleTrigger->isChecked()){
         protocol->command('S',this->protocolChannel,2);
+        runState = SINGLE;
     }
     else {
         protocol->command('S',this->protocolChannel,1);
+        runState = RUNNING;
     }
 }
 
 void ScopeWidget::stopOsc(){
     protocol->command('S',this->protocolChannel,0);
+    runState = STOPPED;
 }
 
 void ScopeWidget::displayData(){
     BinaryTransfer* transfer = protocol->popTransfer(this->protocolChannel);
     if(transfer != NULL){
-
-        runningIcon->ping();
+        if(runState == SINGLE){
+            runningIcon->stop();
+            runState = STOPPED;
+        }
+        else {
+            runningIcon->ping();
+        }
         dataSet->setTrigger(triggerPositionControl->getValue()*0.01, triggerControl->getValue());
 
         float sampleTime = sampleRateControl->getValue() * 0.001f;
