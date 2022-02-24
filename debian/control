@@ -1,0 +1,15 @@
+Source: zero-elabviewer
+Section: devel
+Priority: optional
+Maintainer: Adam;Berlinger;<berlingeradam@gmail.com>
+Build-Depends: cmake, debhelper (>= 9), libfftw3-dev, pkg-config, qtbase5-dev, qttools5-dev, libqt5serialport5-dev, libqt5opengl5-dev, qtdeclarative5-dev
+Standards-Version: 3.9.8
+Homepage: https://github.com/adamberlinger/zero_elabviewer/
+Vcs-Git: https://github.com/adamberlinger/zero_elabviewer/
+Vcs-Browser: https://github.com/adamberlinger/zero_elabviewer/
+
+Package: zero-elabviewer
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Zero eLab Viewer for Cheap SDI Instruments
+ Zero eLab Viewer is a PC program for displaying ;and controlling external data acquisition system through ;standard communication interface such as USB CDC class.
