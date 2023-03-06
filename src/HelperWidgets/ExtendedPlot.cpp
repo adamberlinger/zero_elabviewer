@@ -256,7 +256,7 @@ ExtendedPlot::ExtendedPlot(QWidget* parent):QCustomPlot(parent),
     contextMenu = new QMenu(tr("Context menu"),this);
     resetZoomAction = new QAction("Reset zoom", this);
     showPointsAction = new QAction("Show points", this);
-    storeDataAction = new QAction("Store data", this);
+    storeDataAction = new QAction("Store data (please disable offset)", this);
     addXCursorAction = new QAction(tr("Add X cursor"),this);
     addYCursorAction = new QAction(tr("Add Y cursor"),this);
     addXYCursorAction = new QAction(tr("Add XY cursors"),this);
@@ -398,16 +398,42 @@ void ExtendedPlot::saveData(){
     QString filePath = QFileDialog::getSaveFileName(this,
         "Save File", QString(), "CSV (*.csv);;MATLAB/Octave (*.mat)");
 
+    double t_mult = 1 / frequencyMultiplier;
     if(!filePath.isNull()){
+
         QFile file(filePath);
         file.open(QIODevice::WriteOnly);
-        QMapIterator<double, QCPData> it(*this->graph(0)->data());
+
         QTextStream textStream(&file);
-        while(it.hasNext()){
-            it.next();
-            textStream << it.value().value << "\n";
+        textStream << "Time (s)";
+        QMapIterator<double, QCPData>** it = new QMapIterator<double, QCPData>*[this->graphCount()];
+        for(int i = 0;i < this->graphCount();++i){
+            it[i] = new QMapIterator<double, QCPData>(*this->graph(i)->data());
+            textStream << ",CH" << (i+1);
+        }
+        textStream << "\n";
+
+        volatile int test_counter = 0;
+        while(it[0]->hasNext()){
+
+            it[0]->next();
+            textStream << (it[0]->value().key * t_mult) << "," << it[0]->value().value;
+            for(int i = 1; i < this->graphCount();++i){
+                textStream << ",";
+                if(it[i]->hasNext()){
+                    it[i]->next();
+                    textStream << it[i]->value().value;
+                }
+            }
+            textStream << "\n";
+            test_counter++;
         }
         file.close();
+
+        for(int i = 0; i < this->graphCount();++i){
+            delete it[i];
+        }
+        delete[] it;
     }
 }
 
