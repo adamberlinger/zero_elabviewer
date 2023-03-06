@@ -16,12 +16,43 @@
  */
 #include "RecordWidget.h"
 
-#define MAX_SAMPLES     (1000)
+/* This should correspond to 1 minute without averaging */
+/* Now used only as a hint for MultiRecordWidgetChannel */
+#define MAX_SAMPLES     (6000)
+
+static const double recordWidthOptions[8] = {
+    5.0, 10.0, 30.0, 60.0, 2*60.0, 5*60.0, 10*60.0, 30*60.0
+};
+
+static const char* recordWidthOptionNames[8] = {
+    "5s" , "10s", "30s", "1min", "2min", "5min", "10min", "30min",
+};
+
+/* This should correspond to 30s without averaging */
+#define MAX_SAMPLES_DEFAULT_INDEX (1)
+
+static const unsigned int maxSamplesOptions[5] = {
+    0 ,3000, 6000, 5*6000, 30*6000,
+};
+
+static const char* maxSamplesOptionNames[5] = {
+    "Adjust to X axis zoom",
+    "3000 (>30s)",
+    "6000 (>1min)",
+    "30000 (>5min)",
+    "180000 (>30min)",
+};
 
 RecordWidget::RecordWidget(QString caption, QString yAxisLabel, bool hideOnClose,double recordWidth){
     this->setLayout(mainLayout = new QHBoxLayout());
     this->hideOnClose = hideOnClose;
-    this->recordWidth = recordWidth;
+    this->enableWidthSelect = (recordWidth < 0);
+    if(this->enableWidthSelect){
+        this->recordWidth = 5.0;
+    }
+    else {
+        this->recordWidth = recordWidth;
+    }
     plot = new ExtendedPlot(this);
 
     plot->addGraph();
@@ -49,7 +80,28 @@ RecordWidget::RecordWidget(QString caption, QString yAxisLabel, bool hideOnClose
     controlLayout->addWidget(startButton = new QPushButton("Start"));
     controlLayout->addWidget(stopButton = new QPushButton("Stop"));
     controlLayout->addWidget(clearButton = new QPushButton("Clear"));
+    controlLayout->addWidget(resetZoomButton = new QPushButton("Reset Zoom"));
 
+    if(this->enableWidthSelect){
+        controlLayout->addWidget(new QLabel("X Axis zoom:"));
+        controlLayout->addWidget(widthSelect = new QComboBox());
+        for(int i = 0;i < 8;++i){
+            widthSelect->addItem(recordWidthOptionNames[i], recordWidthOptions[i]);
+        }
+        QObject::connect (widthSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(changeXAxisZoom(int)));
+    }
+    else {
+        widthSelect = NULL;
+    }
+
+    controlLayout->addWidget(new QLabel("Record memory (samples):"));
+    controlLayout->addWidget(dataSizeSelect = new QComboBox());
+    for(int i = 0;i < 5;++i){
+        dataSizeSelect->addItem(maxSamplesOptionNames[i]);
+    }
+    dataSizeSelect->setCurrentIndex(MAX_SAMPLES_DEFAULT_INDEX);
+    dataSize = maxSamplesOptions[MAX_SAMPLES_DEFAULT_INDEX];
+    QObject::connect (dataSizeSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDataSize(int)));
 
     controlLayout->addWidget(noiseLevelLabel = new QLabel("Noise:"));
     controlLayout->addWidget(noiseLevelButton = new QPushButton("Compute noise"));
@@ -68,6 +120,7 @@ RecordWidget::RecordWidget(QString caption, QString yAxisLabel, bool hideOnClose
     QObject::connect (startButton, SIGNAL(pressed()), this, SLOT(startRecording()));
     QObject::connect (stopButton, SIGNAL(pressed()), this, SLOT(stopRecording()));
     QObject::connect (clearButton, SIGNAL(pressed()), this, SLOT(clearRecord()));
+    QObject::connect (resetZoomButton, SIGNAL(pressed()), this->plot, SLOT(resetZoom()));
     QObject::connect (noiseLevelButton, SIGNAL(pressed()), this, SLOT(computeNoise()));
 }
 
@@ -106,6 +159,16 @@ void RecordWidget::computeNoise(){
     noiseLevelLabel->setText(QString("Noise: %1").arg(noise_level));
 }
 
+void RecordWidget::changeXAxisZoom(int index){
+    this->recordWidth = recordWidthOptions[index];
+    plot->lazyZoomX(0, this->recordWidth);
+    plot->replot();
+}
+
+void RecordWidget::changeDataSize(int index){
+    this->dataSize = maxSamplesOptions[index];
+}
+
 void RecordWidget::startRecording(){
     running = true;
 }
@@ -141,9 +204,12 @@ void RecordWidget::record(float value, float time){
     }
     dataX.push_back(x);
     dataY.push_back(value);
-    if(dataX.size() > (MAX_SAMPLES*2)){
-        dataX.erase(dataX.begin(),dataX.begin()+MAX_SAMPLES);
-        dataY.erase(dataY.begin(),dataY.begin()+MAX_SAMPLES);
+
+    size_t max_samples = (dataSize>0)?dataSize:(size_t)(this->recordWidth*100);
+
+    if(dataX.size() > (max_samples*2)){
+        dataX.erase(dataX.begin(),dataX.begin()+max_samples);
+        dataY.erase(dataY.begin(),dataY.begin()+max_samples);
     }
     plot->graph(0)->setData(dataX,dataY);
     if(x > this->recordWidth){
@@ -225,7 +291,13 @@ MultiRecordWidget::MultiRecordWidget(QString caption, QString yAxisLabel,
     bool hideOnClose,double recordWidth, uint32_t fixedChannels){
     this->setLayout(mainLayout = new QHBoxLayout());
     this->hideOnClose = hideOnClose;
-    this->recordWidth = recordWidth;
+    this->enableWidthSelect = (recordWidth < 0);
+    if(this->enableWidthSelect){
+        this->recordWidth = 5.0;
+    }
+    else {
+        this->recordWidth = recordWidth;
+    }
     this->fixedChannels = fixedChannels;
     plot = new ExtendedPlot(this);
 
@@ -253,7 +325,28 @@ MultiRecordWidget::MultiRecordWidget(QString caption, QString yAxisLabel,
     controlLayout->addWidget(startButton = new QPushButton("Start"));
     controlLayout->addWidget(stopButton = new QPushButton("Stop"));
     controlLayout->addWidget(clearButton = new QPushButton("Clear"));
+    controlLayout->addWidget(resetZoomButton = new QPushButton("Reset Zoom"));
 
+    if(this->enableWidthSelect){
+        controlLayout->addWidget(noiseLevelLabel = new QLabel("X Axis zoom:"));
+        controlLayout->addWidget(widthSelect = new QComboBox());
+        for(int i = 0;i < 8;++i){
+            widthSelect->addItem(recordWidthOptionNames[i], recordWidthOptions[i]);
+        }
+        QObject::connect (widthSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(changeXAxisZoom(int)));
+    }
+    else {
+        widthSelect = NULL;
+    }
+
+    controlLayout->addWidget(new QLabel("Record memory (samples):"));
+    controlLayout->addWidget(dataSizeSelect = new QComboBox());
+    for(int i = 0;i < 5;++i){
+        dataSizeSelect->addItem(maxSamplesOptionNames[i]);
+    }
+    dataSizeSelect->setCurrentIndex(MAX_SAMPLES_DEFAULT_INDEX);
+    dataSize = maxSamplesOptions[MAX_SAMPLES_DEFAULT_INDEX];
+    QObject::connect (dataSizeSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDataSize(int)));
 
     controlLayout->addWidget(noiseLevelLabel = new QLabel("Noise:"));
     controlLayout->addWidget(noiseLevelButton = new QPushButton("Compute noise"));
@@ -262,6 +355,8 @@ MultiRecordWidget::MultiRecordWidget(QString caption, QString yAxisLabel,
 
     mainLayout->addWidget(plot,1);
     mainLayout->addWidget(sidePanel,0);
+
+    plotTimer.setSingleShot(true);
 
     running = false;
 
@@ -274,7 +369,9 @@ MultiRecordWidget::MultiRecordWidget(QString caption, QString yAxisLabel,
     QObject::connect (startButton, SIGNAL(pressed()), this, SLOT(startRecording()));
     QObject::connect (stopButton, SIGNAL(pressed()), this, SLOT(stopRecording()));
     QObject::connect (clearButton, SIGNAL(pressed()), this, SLOT(clearRecord()));
+    QObject::connect (resetZoomButton, SIGNAL(pressed()), this->plot, SLOT(resetZoom()));
     QObject::connect (noiseLevelButton, SIGNAL(pressed()), this, SLOT(computeNoise()));
+    QObject::connect (&plotTimer, SIGNAL(timeout()), this, SLOT(replot()));
 
     channelMenu = new QMenu(tr("Channels visibility"),plot);
     singleChannelMenu = new QMenu(tr("Show single channel"),plot);
@@ -355,6 +452,16 @@ void MultiRecordWidget::computeNoise(){
 #endif
 }
 
+void MultiRecordWidget::changeXAxisZoom(int index){
+    this->recordWidth = recordWidthOptions[index];
+    plot->lazyZoomX(0, this->recordWidth);
+    plot->replot();
+}
+
+void MultiRecordWidget::changeDataSize(int index){
+    this->dataSize = maxSamplesOptions[index];
+}
+
 void MultiRecordWidget::startRecording(){
     running = true;
 }
@@ -408,6 +515,7 @@ void MultiRecordWidget::clearRecord(){
 }
 
 void MultiRecordWidget::recordPrepare(){
+    plotMutex.lock();
     if(running){
         if(recordTime < 0.0){
             /* Record empty */
@@ -423,6 +531,8 @@ void MultiRecordWidget::recordPrepare(){
 
 void MultiRecordWidget::recordPrepare(float time){
     if(running){
+        if(!recordActive)
+            plotMutex.lock();
         if(recordTime < 0.0){
             timer.start();
             recordTime = 0.0;
@@ -474,15 +584,25 @@ void MultiRecordWidget::record(float value, int slot){
     }
     activeChannel->dataX.push_back(recordTime);
     activeChannel->dataY.push_back(value + activeChannel->offset);
-    if(activeChannel->dataX.size() > (MAX_SAMPLES*2)){
-        activeChannel->dataX.erase(activeChannel->dataX.begin(),activeChannel->dataX.begin()+MAX_SAMPLES);
-        activeChannel->dataY.erase(activeChannel->dataY.begin(),activeChannel->dataY.begin()+MAX_SAMPLES);
+    size_t max_samples = (dataSize>0)?dataSize:(size_t)(this->recordWidth*100);
+    if(activeChannel->dataX.size() > (max_samples*2)){
+        activeChannel->dataX.erase(activeChannel->dataX.begin(),activeChannel->dataX.begin()+max_samples);
+        activeChannel->dataY.erase(activeChannel->dataY.begin(),activeChannel->dataY.begin()+max_samples);
     }
     activeChannel->graph->setData(activeChannel->dataX,activeChannel->dataY);
 }
 
 void MultiRecordWidget::recordSubmit(){
-    recordActive = false;
+    if(recordActive){
+        recordActive = false;
+        if(!plotTimer.isActive())
+            plotTimer.start(40);
+        plotMutex.unlock();
+    }
+}
+
+void MultiRecordWidget::replot(){
+    plotMutex.lock();
     if(recordTime > this->recordWidth){
         plot->lazyZoomX(recordTime-this->recordWidth, recordTime);
     }
@@ -493,6 +613,7 @@ void MultiRecordWidget::recordSubmit(){
         plot->lazyZoomY(-0.1, 4.0 * fixedChannels + 0.1);
     }
     plot->replot();
+    plotMutex.unlock();
 }
 
 void MultiRecordWidget::recordSimple(float value){

@@ -34,6 +34,7 @@ protected:
     QPushButton* startButton;
     QPushButton* stopButton;
     QPushButton* clearButton;
+    QPushButton* resetZoomButton;
 
     ExtendedPlot* plot;
     QVector<double> dataX,dataY;
@@ -42,9 +43,13 @@ protected:
     double recordWidth;
     bool running;
     bool hideOnClose;
+    bool enableWidthSelect;
+    size_t dataSize;
 
     QLabel* noiseLevelLabel;
     QPushButton* noiseLevelButton;
+    QComboBox* widthSelect;
+    QComboBox* dataSizeSelect;
 
     virtual void closeEvent(QCloseEvent *event);
 private slots:
@@ -52,11 +57,13 @@ private slots:
     void stopRecording();
     void clearRecord();
     void computeNoise();
+    void changeXAxisZoom(int index);
+    void changeDataSize(int index);
 public slots:
     void record(float value);
     void record(float value, float time);
 public:
-    RecordWidget(QString caption, QString yAxisLabel,bool hideOnClose, double recordWidth = 5.0);
+    RecordWidget(QString caption, QString yAxisLabel,bool hideOnClose, double recordWidth = -1.0);
     virtual ~RecordWidget();
 };
 
@@ -92,6 +99,7 @@ protected:
     QPushButton* startButton;
     QPushButton* stopButton;
     QPushButton* clearButton;
+    QPushButton* resetZoomButton;
     QHash<int,MultiRecordWidgetChannel*> channels;
     QElapsedTimer timer;
     QMenu* channelMenu;
@@ -105,6 +113,8 @@ protected:
     bool running;
     bool recordActive;
     bool hideOnClose;
+    bool enableWidthSelect;
+    size_t dataSize;
     bool minMaxInitialized;
 
     double recordTime;
@@ -113,6 +123,11 @@ protected:
 
     QLabel* noiseLevelLabel;
     QPushButton* noiseLevelButton;
+    QComboBox* widthSelect;
+    QComboBox* dataSizeSelect;
+
+    QMutex plotMutex;
+    QTimer plotTimer;
 
     virtual void closeEvent(QCloseEvent *event);
 private slots:
@@ -120,6 +135,8 @@ private slots:
     void stopRecording();
     void clearRecord();
     void computeNoise();
+    void changeXAxisZoom(int index);
+    void changeDataSize(int index);
 public slots:
     void recordSimple(float value);
     void recordPrepare();
@@ -129,8 +146,9 @@ public slots:
     void showAll();
     void hideAll();
     void enableOffset(bool value);
+    void replot();
 public:
-    MultiRecordWidget(QString caption, QString yAxisLabel,bool hideOnClose, double recordWidth = 5.0, uint32_t fixedChannels = 0);
+    MultiRecordWidget(QString caption, QString yAxisLabel,bool hideOnClose, double recordWidth = -1.0, uint32_t fixedChannels = 0);
     virtual ~MultiRecordWidget();
     void setChannelVisibility(int slot,bool value);
 };

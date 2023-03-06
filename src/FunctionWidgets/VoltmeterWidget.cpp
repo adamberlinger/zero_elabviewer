@@ -16,6 +16,7 @@
  */
 #include "VoltmeterWidget.h"
 #include <iostream>
+#include <cmath>
 
 static const char* select_voltage[] = {
     "Voltage1",
@@ -25,6 +26,17 @@ static const char* select_voltage[] = {
     "V2 - V1",
     "V3 - V2",
 };
+
+/* Function to filter voltage values to reasonable bounds.
+    From time to time strange/error values are computed/measured,
+    which can mess up the record graph.
+*/
+static float volt_filter(float input){
+    if(std::isnan(input)) return 0.0f;
+    if(input > 10.0f) return 10.0f;
+    if(input < -10.0f) return -10.0f;
+    return input;
+}
 
 VoltmeterWidget::VoltmeterWidget(Protocol* protocol,int channel, DataConverter* adcConverter){
     this->protocol = protocol;
@@ -56,9 +68,8 @@ VoltmeterWidget::VoltmeterWidget(Protocol* protocol,int channel, DataConverter* 
 
     QObject::connect (averageSamples, SIGNAL(valueChangedDelayed(float)), this, SLOT(configureNumSamples(float)));
 
-    recordWidget = new MultiRecordWidget("Average voltage - voltmeter","Voltage",true,5.0,4);
+    recordWidget = new MultiRecordWidget("Average voltage - voltmeter","Voltage",true,-1.0,4);
     recordWidget->setWindowTitle("Average Voltage");
-    //QObject::connect (this, SIGNAL(yieldVoltage(float,float)), recordWidget, SLOT(recordSimple(float)));
     QObject::connect (showRecordButton, SIGNAL(pressed()), recordWidget, SLOT(show()));
 
     responseMeasurement = new ResponseMeasurement("DC analysis","Voltage (V)","Voltage (V)","V","V");
@@ -113,6 +124,11 @@ void VoltmeterWidget::displayData(){
         voltages[1] /= rawData[0];
         voltages[2] /= rawData[0];
         voltages[3] /= rawData[0];
+
+        voltages[0] = volt_filter(voltages[0]);
+        voltages[1] = volt_filter(voltages[1]);
+        voltages[2] = volt_filter(voltages[2]);
+        voltages[3] = volt_filter(voltages[3]);
 
         voltages[4] = voltages[1] - voltages[0];
         voltages[5] = voltages[2] - voltages[1];

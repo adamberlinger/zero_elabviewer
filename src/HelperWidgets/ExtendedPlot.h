@@ -115,6 +115,7 @@ public slots:
     void showHideCursors();
     void removeAllCursors();
     void updateCursorLabels();
+    void resetZoom();
 public:
     QString xCursorLabel;
     QString yCursorLabel;
@@ -128,7 +129,6 @@ public:
     void lazyZoomX(double start, double end);
     void lazyZoomY(double start, double end);
     void resetZoom(double x1, double y1, double x2, double y2);
-    void resetZoom();
     void setShowPoints(bool show);
     void setDataSet(DataSet* data);
     QMenu* getContextMenu(){return contextMenu;}
