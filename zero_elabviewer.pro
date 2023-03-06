@@ -1,3 +1,4 @@
+include(env.pro)
 QT += core gui serialport qml
 CONFIG += serialport
 CONFIG += c++11
@@ -6,7 +7,7 @@ TEMPLATE = app
 TARGET = zero_elabviewer
 DEPENDPATH += src
 INCLUDEPATH += src src/DataUtils src/FunctionWidgets src/HelperWidgets
-LIBS+=-lfftw3
+LIBS += -lfftw3
 RESOURCES = resources/resources.qrc
 
 # Input

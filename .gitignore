@@ -4,3 +4,4 @@ Makefile
 zero_elabviewer.pro.user
 # This file should be generated from firmware package
 /resources/help/help_targets.html
+env.pro

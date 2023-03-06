@@ -18,7 +18,7 @@
 #define _APPLICATION_H_
 
 #include <QtGui>
-#include <QtSerialPort/QtSerialPort>
+#include <QSerialPort>
 #include <QPushButton>
 #include "qcustomplot.h"
 #include "Protocol.h"
