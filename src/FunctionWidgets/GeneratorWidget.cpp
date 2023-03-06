@@ -22,7 +22,7 @@ GeneratorWidget::GeneratorWidget(Protocol* protocol, int channel){
     this->protocolChannel = channel;
 
     this->setLayout(mainLayout = new QVBoxLayout);
-    frequencyControl = new FrequencyControl("Frequency:",100.0f);
+    frequencyControl = new FrequencyControl("Frequency:",100.0f, true);
     scaleControl = new SliderControl("Amplitude: %1 %",100.0f,0.0f,100.0f,0.1f);
     offsetControl = new SliderControl("Offset: %1 %",0.0f,0.0f,100.0f,0.1f);
     voltageControl = new SliderControl("Voltage: %1 V",0.0f,0.0f,3.3f,0.001f);
@@ -50,6 +50,7 @@ GeneratorWidget::GeneratorWidget(Protocol* protocol, int channel){
     shapeSineButton->setChecked(true);
 
     QObject::connect (protocol, SIGNAL(deviceReconnected()), this, SLOT(configureAll()));
+    QObject::connect (protocol, SIGNAL(commandReceived()), this, SLOT(commandReceived()));
 
     QObject::connect (frequencyControl, SIGNAL(valueChangedDelayed(float)), this, SLOT(configureFrequency(float)));
     QObject::connect (scaleControl, SIGNAL(valueChangedDelayed(float)), this, SLOT(configureScale(float)));
@@ -61,6 +62,21 @@ GeneratorWidget::GeneratorWidget(Protocol* protocol, int channel){
 
     QObject::connect(voltageControl, SIGNAL(valueChangedDelayed(float)), this, SLOT(configureVoltage()));
     QObject::connect(voltageOutputEnable, SIGNAL(stateChanged(int)), this, SLOT(configureVoltage()));
+}
+
+void GeneratorWidget::commandReceived(){
+    const Command* command = protocol->getLastCommand();
+    if(command->channel == this->protocolChannel){
+        if(command->command_id == 'F'){
+            timerFrequency = command->value;
+        }
+        else if(command->command_id == 'D') {
+            if(timerFrequency > 0){
+                double realFrequency = ((double)timerFrequency) / command->value;
+                frequencyControl->setRealValue(realFrequency);
+            }
+        }
+    }
 }
 
 void GeneratorWidget::configureAll(){

@@ -48,6 +48,7 @@ protected:
 
     QPushButton* startButton;
     QPushButton* stopButton;
+    uint32_t timerFrequency;
 public slots:
     void configureAll();
     void configureFrequency(float value);
@@ -59,6 +60,7 @@ public slots:
     void stopGenerator();
 public slots:
     void setStaticVoltage(float value);
+    void commandReceived();
 public:
     GeneratorWidget(Protocol* protocol, int channel);
     virtual ~GeneratorWidget();
