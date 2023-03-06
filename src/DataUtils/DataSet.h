@@ -119,6 +119,7 @@ protected:
     uint32_t channel_mask;
     /** \brief Index of the trigger channel */
     int trigger_channel;
+    int total_channels;
 public slots:
     void setChannelMask(uint32_t value);
     void setTriggerChannel(int value);

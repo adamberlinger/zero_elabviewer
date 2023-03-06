@@ -164,7 +164,7 @@ double DataSet::dataInput(BinaryTransfer* transfer,DataConverter* converter){
     int total_width = 0;
     /* Total length of sample data in bytes */
     int total_length = transfer->getSize() - header_size;
-    int total_channels = 0;
+    this->total_channels = 0;
     for(int i = 0;i < buffer_count;++i){
         buffer_desc[i].init(data[i+1]);
         total_width += buffer_desc[i].totalWidth;
@@ -254,7 +254,8 @@ double DataSet::dataInput(BinaryTransfer* transfer,DataConverter* converter){
         xAxis = new QVector<double>(size);
     }
 
-    displayOffset = getTriggerOffset(getTriggerChannelIndex(trigger_channel,channel_mask));
+    int trig_index = getTriggerChannelIndex(trigger_channel,channel_mask);
+    displayOffset = (trig_index < total_channels)?getTriggerOffset(trig_index):0.0;
     if(approx == DataSet::APPROX_SHIFT){
         for(int i = 0;i < size;++i){
             (*xAxis)[i] = (i + displayOffset) / fs;
@@ -282,7 +283,7 @@ void DataSet::setOffset(int channel, double value){
 
 double DataSet::getTriggerChannelOffset(){
     int index = getTriggerChannelIndex(trigger_channel,channel_mask);
-    return yAxises[index]->getOffset();
+    return (index < total_channels)?yAxises[index]->getOffset():0.0;
 }
 
 double DataSet::getTriggerOffset(int index){
