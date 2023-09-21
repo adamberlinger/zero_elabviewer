@@ -22,6 +22,7 @@ StatusWidget::StatusWidget(DeviceDescription* deviceDescription){
     layout->addWidget(connectedStatusLabel = new QLabel("Device not connected"));
     layout->addWidget(deviceNameLabel = new QLabel("Device: unknown"));
     layout->addWidget(deviceConfigurationLabel = new QLabel("Configuration: default"));
+    layout->addWidget(voltageLabel = new QLabel("Supply voltage: unknown"));
 
     this->deviceDescription = deviceDescription;
     QObject::connect (deviceDescription, SIGNAL(valuesChanged()), this, SLOT(deviceDescriptionChanged()));
@@ -34,6 +35,7 @@ void StatusWidget::deviceDisconnected(){
     connectedStatusLabel->setText("Device not connected");
     deviceNameLabel->setText("Device: unknown");
     deviceConfigurationLabel->setText("Configuration: default");
+    voltageLabel->setText("Supply voltage: unknown");
 }
 
 void StatusWidget::deviceDescriptionChanged(){
@@ -44,6 +46,7 @@ void StatusWidget::deviceDescriptionChanged(){
     else {
         deviceConfigurationLabel->setText("Configuration: default");
     }
+    voltageLabel->setText(QString("Supply voltage: %1 V").arg(deviceDescription->supplyVoltage,7,'f',3));
 }
 
 StatusWidget::~StatusWidget(){

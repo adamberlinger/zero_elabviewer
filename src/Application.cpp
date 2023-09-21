@@ -98,9 +98,9 @@ Application::Application(){
     this->addFunctionWidget(voltmeterWindow, "Volt meter",3);
     this->addFunctionWidget(pulseCounterWidget, "Pulse counter",6);
 
-    logo_image.load(":/img/ctu_logo_tiny_en.png");
-
     leftLayout->addWidget(statusWidget = new StatusWidget(protocol->getDeviceDescription()));
+
+    logo_image.load(":/img/ctu_logo_tiny_en.png");
     leftLayout->addWidget(logo = new QLabel(""));
     logo->setPixmap(logo_image);
     leftLayout->addStretch(1);

@@ -51,6 +51,7 @@ BinaryTransfer::~BinaryTransfer(){
 
 DeviceDescription::DeviceDescription(){
     capabilities = 0xFFFFFFFF;
+    supplyVoltage = 0.0;
 }
 
 
@@ -61,6 +62,7 @@ bool DeviceDescription::hasCapability(DeviceDescription::Capabilities cap){
 void DeviceDescription::clear(){
     name = "";
     configurationName = "";
+    supplyVoltage = 0.0;
 }
 
 DeviceDescription::~DeviceDescription(){
@@ -169,7 +171,6 @@ void Protocol::processChunk(int size){
 
             case Protocol::BINARY_START:
                 currentTransfer = new BinaryTransfer((int)buffer[i]);
-                //std::cout << "Receiving binary data" << std::endl;
                 state = BINARY_LENGTH_1;
                 break;
             case Protocol::BINARY_LENGTH_1:
@@ -195,7 +196,6 @@ void Protocol::processChunk(int size){
                         else {
                             this->binaryReceived();
                         }
-                        //std::cout << "Binary transfer of size " << currentTransfer->getSize() << " received" << std::endl;
                         state = Protocol::IDLE;
                     }
                     i += (length-1);
@@ -228,6 +228,9 @@ void Protocol::coreTransfer(BinaryTransfer* transfer){
                 qDebug() << "Supply voltage: " << supplyVoltage << "V";
                 supplyVoltageValue(supplyVoltage);
                 coreState.last_command_valid = false;
+
+                deviceDescription.supplyVoltage = supplyVoltage;
+                deviceDescription.valuesChanged();
             }
             this->command('G',0,'C');
             coreState.last_command = 'C';

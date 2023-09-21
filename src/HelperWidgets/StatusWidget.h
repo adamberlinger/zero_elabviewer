@@ -31,6 +31,7 @@ protected:
     QLabel* deviceNameLabel;
     QLabel* connectedStatusLabel;
     QLabel* deviceConfigurationLabel;
+    QLabel* voltageLabel;
     DeviceDescription* deviceDescription;
 public slots:
     void deviceConnected();

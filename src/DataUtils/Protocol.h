@@ -58,6 +58,7 @@ public:
     QString name;
     QString configurationName;
     uint32_t capabilities;
+    double supplyVoltage;
 
     DeviceDescription();
     virtual ~DeviceDescription();
