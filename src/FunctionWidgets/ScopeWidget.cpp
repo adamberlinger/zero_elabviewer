@@ -98,6 +98,7 @@ ScopeWidget::ScopeWidget(Protocol* protocol, int channel, DataConverter* adcConv
     sampleRateControl = new FrequencyControl(QString("Sample rate:"),1000.0f,true);
     triggerPositionControl = new SliderControl(QString("Trigger position: %1 %"),15.0f,0.0f,100.0f,0.1f);
     bufferSizeControl = new SliderControl(QString("Buffer size: %1 #"),1024.0f,10.0f,16*1024.0f,1.0f);
+    averagingWaveControl = new SliderControl(QString("Averaging: %1 #"), 1.0f, 1.0f, (double)DATASET_MAX_AVG, 1.0f);
     triggerStart = new QPushButton("Start");
     triggerStop = new QPushButton("Stop");
 
@@ -113,13 +114,16 @@ ScopeWidget::ScopeWidget(Protocol* protocol, int channel, DataConverter* adcConv
     controlLayout->addWidget(triggerPositionControl,row++,0,1,2);
     controlLayout->addWidget(sampleRateControl,row++,0,1,2);
     controlLayout->addWidget(bufferSizeControl,row++,0,1,2);
+    controlLayout->addWidget(averagingWaveControl,row,0,1,1);
+    controlLayout->addWidget(resetAvgButton = new QPushButton("Reset Average"),row++,1,1,1);
+    controlLayout->addWidget(realAvgSizeLabel = new QLabel("No averaging"), row++,0,1,2);
     controlLayout->addWidget(resetZoomButton = new QPushButton("Reset Zoom"),row++,0,1,2);
     controlLayout->addWidget(runningIcon = new RunningIcon(1000),row,0,1,1);
     controlLayout->addWidget(realBufferSizeLabel = new QLabel("Samples: ?"), row++,1,1,1);
 
     triggerRisingEdge->setCheckState(Qt::Checked);
 
-    controlLayout->addItem(new QSpacerItem(0,0,QSizePolicy::Minimum,QSizePolicy::Expanding),8,0,1,2);
+    controlLayout->addItem(new QSpacerItem(0,0,QSizePolicy::Minimum,QSizePolicy::Expanding),row++,0,1,2);
 
     averagingControl = new SliderControl(QString("Averaging: %1 samples"),0.0f,0.0f,16.0f,1.0f);
 
@@ -144,6 +148,7 @@ ScopeWidget::ScopeWidget(Protocol* protocol, int channel, DataConverter* adcConv
 
     QObject::connect (triggerControl, SIGNAL(valueChangedDelayed(float)), this, SLOT(configureTrigger(float)));
     QObject::connect (bufferSizeControl, SIGNAL(valueChangedDelayed(float)), this, SLOT(configureBufferSize(float)));
+    QObject::connect (averagingWaveControl, SIGNAL(valueChangedDelayed(float)), this, SLOT(configureWaveAveraging(float)));
     QObject::connect (triggerControl, SIGNAL(valueChanged(float)), this, SLOT(repaintTrigger(float)));
     QObject::connect (triggerStart, SIGNAL(pressed()), this, SLOT(startOsc()));
     QObject::connect (singleTrigger, SIGNAL(stateChanged(int)), this, SLOT(singleTriggerToggle()));
@@ -166,6 +171,7 @@ ScopeWidget::ScopeWidget(Protocol* protocol, int channel, DataConverter* adcConv
     QObject::connect (protocol, SIGNAL(deviceReconnected()), this, SLOT(configureAll()));
     QObject::connect (protocol, SIGNAL(commandReceived()), this, SLOT(commandReceived()));
     QObject::connect (resetZoomButton, SIGNAL(pressed()), this->mainPlot, SLOT(resetZoomAndReplot()));
+    QObject::connect (resetAvgButton, SIGNAL(pressed()), this->dataSet, SLOT(resetAverage()));
 
     recordWidget = new RecordWidget("Average voltage - oscilloscope","Voltage",true);
     recordWidget->setWindowTitle("Average Voltage");
@@ -265,6 +271,10 @@ void ScopeWidget::configureBufferSize(float value){
     protocol->command('B',this->protocolChannel, (int)std::floor(value + 0.5f));
 }
 
+void ScopeWidget::configureWaveAveraging(float value){
+    dataSet->setAveraging(std::floor(value + 0.5f));
+}
+
 void ScopeWidget::configureTriggerPosition(float value){
     uint16_t device_value = std::floor(value * 10.0f + 0.5f);
     protocol->command('D',this->protocolChannel,device_value);
@@ -303,6 +313,7 @@ void ScopeWidget::repaintTrigger(float value){
 void ScopeWidget::configureSampleRate(float value){
     uint16_t device_value = DataConverter::convertSampleRate(value);
     protocol->command('F',this->protocolChannel,(uint16_t)device_value);
+    dataSet->resetAverage();
 }
 
 void ScopeWidget::startOsc(){
@@ -341,6 +352,15 @@ void ScopeWidget::displayData(){
         mainPlot->setDataSet(dataSet);
 
         int size = dataSet->getXAxis()->length();
+        int avg_size = dataSet->getAvgSamples();
+        if(averagingWaveControl->getValue() > 1.5f){
+            realAvgSizeLabel->setText(QString("Avg. samples %1/%3, (index %2)")
+                .arg(avg_size).arg(dataSet->getAvgIndex())
+                .arg(dataSet->getAveraging()));
+        }
+        else {
+            realAvgSizeLabel->setText(QString("No averaging"));
+        }
         realBufferSizeLabel->setText(QString("Samples: %1").arg(size));
         mainPlot->lazyZoomX(0,size / sampleTime);
         if(dataSet->length() > 1){

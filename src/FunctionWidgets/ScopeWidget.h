@@ -63,10 +63,13 @@ protected:
     FrequencyControl* sampleRateControl;
     SliderControl* triggerPositionControl;
     SliderControl* bufferSizeControl;
+    SliderControl* averagingWaveControl;
     QLabel* realBufferSizeLabel;
+    QLabel* realAvgSizeLabel;
     QPushButton* triggerStart;
     QPushButton* triggerStop;
     QPushButton* resetZoomButton;
+    QPushButton* resetAvgButton;
     QPushButton* showRecordButton;
     QPushButton* showSpectrumButton;
 
@@ -119,6 +122,7 @@ private slots:
     void configureTriggerPolarity(int unused);
     void configureAveraging(float value);
     void configureBufferSize(float value);
+    void configureWaveAveraging(float value);
     void configureChannels(uint32_t channelMask);
     void configureTriggerChannel(int channel);
     void setChannelOffset(bool value);

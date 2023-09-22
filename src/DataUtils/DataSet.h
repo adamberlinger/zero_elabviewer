@@ -20,6 +20,9 @@
 #include <QtGui>
 #include "DataConverter.h"
 
+#define DATASET_MAX_AVG    (32)
+#define MAX_BUFFER_COUNT        (15)
+
 struct BufferDescription {
     /** \brief totalWidth = channels * sampleWidth */ 
     int totalWidth;
@@ -75,6 +78,9 @@ public:
     void removeOffset();
     double getOffset() {return currentDataOffset;}
     void resize(int size);
+    void clear();
+    void add(const DataStream* other);
+    void multiply(double value);
     virtual ~DataStream();
 };
 
@@ -120,9 +126,22 @@ protected:
     /** \brief Index of the trigger channel */
     int trigger_channel;
     int total_channels;
+    /** \brief Number of waveforms to average */
+    uint32_t averaging;
+    /** \brief Current index for averaging */
+    uint32_t avg_index;
+    /** \brief Current number of samples for averaging (used during startup) */
+    uint32_t avg_count;
+    /** \brief Current number of Y buffers */
+    int current_y_size;
+    /** \brief Previous header, we need to reset averaging when parameters change */
+    uint8_t previous_header[MAX_BUFFER_COUNT+1];
+    /** \brief Previous transfer size (need to reset averaging) */
+    int last_transfer_size;
 public slots:
     void setChannelMask(uint32_t value);
     void setTriggerChannel(int value);
+    void resetAverage();
 public:
     DataSet(int channels, double fs = 1.0);
     double setOffsetCalculation(DataSet::OffsetCalculation type, double value);
@@ -136,7 +155,15 @@ public:
     double getTriggerOffset(int index);
     double getTriggerChannelOffset();
     void setDisplayOffset(double value){displayOffset = value;}
+    void setAveraging(uint32_t value);
+    int getAvgSamples(){return avg_count;}
+    int getAvgIndex(){
+        return (avg_index == 0)?avg_count:avg_index; 
+    }
+    int getAveraging(){return averaging;}
     virtual ~DataSet();
+private:
+    void clearYAxises();
 };
 
 #endif /* _DATA_SET_H_ */

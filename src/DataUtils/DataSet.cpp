@@ -103,6 +103,44 @@ void DataStream::removeOffset(){
     newDataOffset = currentDataOffset = 0.0;
 }
 
+void DataStream::clear(){
+    if(dataType == DataType::DATA_ANALOG){
+        for(int i = 0;i < data.doubleData->size();++i){
+             (*this->data.doubleData)[i] = 0.0;
+        }
+    }
+    newDataOffset = currentDataOffset = 0.0;
+}
+void DataStream::add(const DataStream* other){
+    if(other->dataType != dataType) return;
+
+    if(dataType == DataType::DATA_ANALOG){
+        if(data.doubleData->size() != other->data.doubleData->size())
+            return;
+
+        for(int i = 0;i < data.doubleData->size();++i){
+             (*this->data.doubleData)[i] += (*other->data.doubleData)[i];
+        }
+    }
+    else if (dataType == DataType::DATA_BITS){
+        if(data.bitData->size() != other->data.bitData->size())
+            return;
+
+        /* For digital channels, we only use the latest data */
+        for(int i = 0;i < data.bitData->size();++i){
+             (*this->data.bitData)[i] = (*other->data.bitData)[i];
+        }
+    }
+}
+
+void DataStream::multiply(double value){
+    if(dataType == DataType::DATA_ANALOG){
+        for(int i = 0;i < data.doubleData->size();++i){
+             (*this->data.doubleData)[i] *= value;
+        }
+    }
+}
+
 DataStream::~DataStream(){
     if(this->dataType == DataStream::DATA_ANALOG){
         delete this->data.doubleData;
@@ -129,6 +167,11 @@ DataSet::DataSet(int channels, double fs){
     this->fs = fs;
     this->displayOffset = 0.0;
     this->offsetCalculation = DataSet::OFFSET_SPREAD;
+    this->averaging = 1;
+    this->avg_index = 0;
+    this->current_y_size = 0;
+    this->previous_header[0] = 0;
+    this->last_transfer_size = 0;
 }
 
 double DataSet::setOffsetCalculation(DataSet::OffsetCalculation type, double value){
@@ -155,10 +198,34 @@ double DataSet::setOffsetCalculation(DataSet::OffsetCalculation type, double val
     return inc_offset;
 }
 
+void DataSet::clearYAxises(){
+    if(yAxises){
+        for(int i = 0;i < current_y_size;++i){
+            delete yAxises[i];
+        }
+        delete[] yAxises;
+        yAxises = NULL;
+    }
+    avg_index = 0;
+    avg_count = 0;
+}
+
 double DataSet::dataInput(BinaryTransfer* transfer,DataConverter* converter){
     const uint8_t *data = transfer->getData();
     int buffer_count = data[0];
     int header_size = data[0] + 1;
+    int y_index = 0;
+    /* More buffers than expected */
+    if(buffer_count > MAX_BUFFER_COUNT) return 0.0;
+
+    bool buffer_changed = (buffer_count != previous_header[0])
+        || (memcmp(data, previous_header, header_size) != 0);
+
+    memcpy(previous_header, data, header_size);
+
+    buffer_changed = buffer_changed || (last_transfer_size != transfer->getSize());
+    last_transfer_size = transfer->getSize();
+
     BufferDescription *buffer_desc = new BufferDescription[buffer_count];
     /* Total number of bytes per sample through all buffers */
     int total_width = 0;
@@ -180,25 +247,80 @@ double DataSet::dataInput(BinaryTransfer* transfer,DataConverter* converter){
     }
     int sample_count = buffer_desc[0].size / (buffer_desc[0].totalWidth);
 
-    if(channels != total_channels){
-        if(yAxises){
-            for(int i = 0;i < channels;++i){
-                delete yAxises[i];
-            }
-            delete[] yAxises;
-            yAxises = NULL;
-        }
+    int new_y_size = (averaging > 1)?((averaging + 1) * total_channels):total_channels;
+
+    /* When we disable averaging we need to re-initialize Y buffers*/
+    buffer_changed = buffer_changed || ((averaging <= 1) && new_y_size != current_y_size);
+        
+    if(buffer_changed){
+        this->clearYAxises();
         channels = total_channels;
     }
+    /* Changing averaging size => reuse some Y buffers */
+    else if(new_y_size != current_y_size){
+        if(yAxises){
+            int old_averaging = (current_y_size / total_channels) - 1;
+            if(old_averaging > 1){
+                DataStream** newYAxises = new DataStream*[new_y_size];
+                memset(newYAxises,0,sizeof(DataStream*)*new_y_size);
+
+                y_index = 0;
+                int a_offset = 0;
+                if(avg_count > averaging){
+                    a_offset = avg_index - averaging;
+                    if(a_offset < 0) a_offset += old_averaging;
+                }
+                else if(avg_count >= old_averaging){
+                    a_offset = avg_index;
+                }
+                for(int i = 0;i < buffer_count;++i){
+                    for(int x = 0;x < buffer_desc[i].channels;++x,++y_index){
+                        newYAxises[y_index] = yAxises[y_index];
+
+                        /* Copy relevant buffers to new array */
+                        for(int a = 0; a < old_averaging;++a){
+                            int src = a + a_offset;
+                            if(src >= old_averaging) src -= old_averaging;
+                            /* Compute absolute index */
+                            src = y_index + ((src+1)*total_channels);
+                            if(a >= averaging){
+                                /* Clear unused buffers */
+                                if(yAxises[src]){
+                                    delete yAxises[src];
+                                }
+                            }
+                            else {
+                                newYAxises[y_index + ((a+1)*total_channels)] = yAxises[src];
+                            }
+                        }
+                    }
+                }
+                delete[] yAxises;
+                yAxises = newYAxises;
+
+                /* compute new avg_count and avg_index */
+                avg_count = std::min(avg_count, averaging);
+                avg_index = avg_count;
+                if(avg_index >= averaging) avg_index -= averaging;
+            }
+            else {
+                this->clearYAxises();
+            }
+        }
+    }
+    current_y_size = new_y_size;
 
     if(yAxises == NULL){
-        yAxises = new DataStream*[total_channels];
-        memset(yAxises,0,sizeof(DataStream*)*total_channels);
+        yAxises = new DataStream*[current_y_size];
+        memset(yAxises,0,sizeof(DataStream*)*current_y_size);
     }
 
     const uint8_t* read_data = data + header_size;
-    int y_index = 0;
-    double inc_offset = 0.0;
+    y_index = 0;
+    if(averaging > 1){
+        /* When averaging, put data in seperate buffer */
+        y_index += (avg_index + 1) * total_channels;
+    }
     for(int i = 0;i < buffer_count;++i){
         for(int x = 0;x < buffer_desc[i].channels;++x,++y_index){
             if(yAxises[y_index] && yAxises[y_index]->getType() != buffer_desc[i].dataType){
@@ -219,9 +341,6 @@ double DataSet::dataInput(BinaryTransfer* transfer,DataConverter* converter){
                 }
             }
             else if(buffer_desc[i].dataType == DataStream::DATA_BITS){
-                if(offsetCalculation == DataSet::OFFSET_NONE){
-                    inc_offset += 4.0;
-                }
 
                 if(yAxises[y_index]){
                     separateBitStream(yAxises[y_index]->getBits(),
@@ -234,12 +353,71 @@ double DataSet::dataInput(BinaryTransfer* transfer,DataConverter* converter){
                         buffer_desc[i].size, buffer_desc[i].totalWidth));
                 }
             }
+        }
+        read_data = read_data + buffer_desc[i].size;
+    }
+
+    /* Do averaging */
+    if(averaging > 1){
+        avg_count++;
+        if(avg_count > averaging) avg_count = averaging;
+        
+        /* Initialize average buffer */
+        y_index = 0;
+        for(int i = 0;i < buffer_count;++i){
+            for(int x = 0;x < buffer_desc[i].channels;++x,++y_index){
+                DataStream::DataType dataType = (DataStream::DataType)buffer_desc[i].dataType;
+                if(yAxises[y_index] && yAxises[y_index]->getType() != dataType){
+                    delete yAxises[y_index];
+                    yAxises[y_index] = NULL;
+                }
+
+                if(yAxises[y_index] == NULL){
+                    yAxises[y_index] = new DataStream(dataType, buffer_desc[i].size / buffer_desc[i].totalWidth);
+                }
+                else {
+                    yAxises[y_index]->clear();
+                }
+            }
+        }
+
+        /* Add buffers */
+        y_index = 0;
+        double mul = 1.0 / avg_count;
+        for(int i = 0;i < buffer_count;++i){
+            for(int x = 0;x < buffer_desc[i].channels;++x,++y_index){
+                if(buffer_desc[i].dataType == DataStream::DATA_ANALOG){
+                    for(int a = 0; a < avg_count;++a){
+                        yAxises[y_index]->add(yAxises[y_index + (a+1) * total_channels]);
+                    }
+                    /* Multiply is faster than division in double */
+                    yAxises[y_index]->multiply(mul);
+                }
+                else {
+                    /* For digital channels, we only use the latest data */
+                    yAxises[y_index]->add(yAxises[y_index + (avg_index + 1) * total_channels]);
+                }
+            }
+        }
+        avg_index++;
+        if(avg_index >= averaging) avg_index = 0;
+    }
+
+    /* Apply offset */
+    double inc_offset = 0.0;
+    y_index = 0;
+    for(int i = 0;i < buffer_count;++i){
+        for(int x = 0;x < buffer_desc[i].channels;++x,++y_index){
+            if(buffer_desc[i].dataType == DataStream::DATA_BITS){
+                if(offsetCalculation == DataSet::OFFSET_NONE){
+                    inc_offset += 4.0;
+                }
+            }
             yAxises[y_index]->applyOffset(inc_offset);
             if(offsetCalculation == DataSet::OFFSET_SPREAD){
                 inc_offset += 4.0;
             }
         }
-        read_data = read_data + buffer_desc[i].size;
     }
 
     if(offsetCalculation == DataSet::OFFSET_NONE){
@@ -303,6 +481,18 @@ double DataSet::getTriggerOffset(int index){
     else {
         return 0.0f;
     }
+}
+
+void DataSet::setAveraging(uint32_t value){
+    uint32_t new_value = (value > DATASET_MAX_AVG)?DATASET_MAX_AVG:value;
+    if(new_value != this->averaging){
+        this->averaging = new_value;
+    }
+}
+
+void DataSet::resetAverage(){
+    this->avg_count = 0;
+    this->avg_index = 0;
 }
 
 DataSet::~DataSet(){
