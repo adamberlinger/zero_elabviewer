@@ -21,6 +21,16 @@ The program uses these libraries:
 
 All are available under GNU GPL or LGPL license.
 
+## Running release on Linux
+
+./run.sh should run the application
+./debug_libs.sh can be used to produce debug output for tracking missing .so libraries
+
+On Ubuntu, following package might be needed to run app properly:
+```
+sudo apt-get install libxcb-xinerama0
+```
+
 ## Copyright
 
 Developed as a part of a student project at Department of Measurement,
