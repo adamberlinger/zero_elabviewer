@@ -23,7 +23,11 @@ AboutWindow::AboutWindow(){
 
     layout->addWidget(mainText = new QTextBrowser());
     mainText->setAlignment(Qt::AlignHCenter);
+#ifdef APP_RC_VERSION
+    layout->addWidget(new QLabel(QString("Version: %1.%2rc%3").arg(APP_MAJOR_VERSION).arg(APP_MINOR_VERSION).arg(APP_RC_VERSION)));
+#else
     layout->addWidget(new QLabel(QString("Version: %1.%2").arg(APP_MAJOR_VERSION).arg(APP_MINOR_VERSION)));
+#endif
     layout->addWidget(closeButton = new QPushButton("Close"));
 
     mainText->setSource(QUrl("qrc:/about.html"));

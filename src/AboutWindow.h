@@ -24,7 +24,9 @@
 #include <QTextBrowser>
 
 #define APP_MAJOR_VERSION     0
-#define APP_MINOR_VERSION  6
+#define APP_MINOR_VERSION  7
+
+//#define APP_RC_VERSION      1
 
 class AboutWindow : public QWidget {
     Q_OBJECT
