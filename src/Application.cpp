@@ -53,6 +53,7 @@ Application::Application(){
 #else
     setWindowTitle(QString("Zero eLab Viewer v%1.%2").arg(APP_MAJOR_VERSION).arg(APP_MINOR_VERSION));
 #endif
+    setWindowIcon(QIcon(":/icons/zero_elabviewer.ico"));
 
     protocol = new Protocol(1024);
 

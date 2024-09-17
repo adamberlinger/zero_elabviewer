@@ -9,6 +9,7 @@ DEPENDPATH += src
 INCLUDEPATH += src src/DataUtils src/FunctionWidgets src/HelperWidgets
 LIBS += -lfftw3
 RESOURCES = resources/resources.qrc
+RC_ICONS = resources/icons/zero_elabviewer.ico
 
 # Input
 SOURCES += $$files(src/*.cpp)
