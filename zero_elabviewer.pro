@@ -59,6 +59,9 @@ desktopicon_png128.path  = $$INSTALL_ROOT/usr/share/icons/hicolor/128x128/apps
 desktopicon_png256.files = resources/icons/256x256/zero_elabviewer.png
 desktopicon_png256.path  = $$INSTALL_ROOT/usr/share/icons/hicolor/256x256/apps
 
-INSTALLS += binfile datafiles desktopentry
+udevrule.files = extras/udev/71-zero-elabviewer.rules
+udevrule.path  = $$INSTALL_ROOT/lib/udev/rules.d
+
+INSTALLS += binfile datafiles desktopentry udevrule
 INSTALLS += desktopicon_svg desktopicon_png16 desktopicon_png24 desktopicon_png32
 INSTALLS += desktopicon_png48 desktopicon_png64 desktopicon_png128 desktopicon_png256
