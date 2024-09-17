@@ -1,0 +1,18 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+
+Name=Zero eLab Viewer
+
+Comment=Interact with F0-Lab and other lab instruments
+Comment[cz]=Pracujte s F0-Lab a dalšími laboratorními přístroji
+
+Icon=zero_elabviewer
+Exec=/usr/bin/zero_elabviewer
+StartupWMClass=zero_elabviewer
+StartupNotify=true
+Terminal=false
+
+Categories=Education;Electricity;Electronics
+Keywords=oscilloscope;voltmeter;generator
+Keywords[cs]=osciloskop;voltmetr;generátor

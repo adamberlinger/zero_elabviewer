@@ -32,4 +32,33 @@ binfile.path=$$INSTALL_ROOT/usr/bin
 datafiles.files=data/*
 datafiles.path=$$INSTALL_ROOT/usr/share/zero_elabviewer
 
-INSTALLS += binfile datafiles
+desktopentry.files = extras/launcher/zero_elabviewer.desktop
+desktopentry.path  = $$INSTALL_ROOT/usr/share/applications
+
+desktopicon_svg.files = resources/icons/zero_elabviewer.svg
+desktopicon_svg.path  = $$INSTALL_ROOT/usr/share/icons/hicolor/scalable/apps
+
+desktopicon_png16.files = resources/icons/16x16/zero_elabviewer.png
+desktopicon_png16.path  = $$INSTALL_ROOT/usr/share/icons/hicolor/16x16/apps
+
+desktopicon_png24.files = resources/icons/24x24/zero_elabviewer.png
+desktopicon_png24.path  = $$INSTALL_ROOT/usr/share/icons/hicolor/24x24/apps
+
+desktopicon_png32.files = resources/icons/32x32/zero_elabviewer.png
+desktopicon_png32.path  = $$INSTALL_ROOT/usr/share/icons/hicolor/32x32/apps
+
+desktopicon_png48.files = resources/icons/48x48/zero_elabviewer.png
+desktopicon_png48.path  = $$INSTALL_ROOT/usr/share/icons/hicolor/48x48/apps
+
+desktopicon_png64.files = resources/icons/64x64/zero_elabviewer.png
+desktopicon_png64.path  = $$INSTALL_ROOT/usr/share/icons/hicolor/64x64/apps
+
+desktopicon_png128.files = resources/icons/128x128/zero_elabviewer.png
+desktopicon_png128.path  = $$INSTALL_ROOT/usr/share/icons/hicolor/128x128/apps
+
+desktopicon_png256.files = resources/icons/256x256/zero_elabviewer.png
+desktopicon_png256.path  = $$INSTALL_ROOT/usr/share/icons/hicolor/256x256/apps
+
+INSTALLS += binfile datafiles desktopentry
+INSTALLS += desktopicon_svg desktopicon_png16 desktopicon_png24 desktopicon_png32
+INSTALLS += desktopicon_png48 desktopicon_png64 desktopicon_png128 desktopicon_png256
