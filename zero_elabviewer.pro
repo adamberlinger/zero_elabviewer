@@ -26,9 +26,9 @@ MOC_DIR = build
 RCC_DIR = build
 
 binfile.files+=build/zero_elabviewer
-binfile.path=/usr/bin
+binfile.path=$$INSTALL_ROOT/usr/bin
 
 datafiles.files=data/*
-datafiles.path=/usr/share/zero_elabviewer
+datafiles.path=$$INSTALL_ROOT/usr/share/zero_elabviewer
 
 INSTALLS += binfile datafiles
