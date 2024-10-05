@@ -36,7 +36,11 @@ ChannelControl::ChannelControl(int numChannels,uint32_t channelMask){
     channelTrigger[0]->setChecked(true);
     layout->setColumnStretch(0,5);
     layout->setColumnStretch(1,5);
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     QObject::connect(triggerButtonGroup, SIGNAL(buttonPressed(int)), this, SLOT(radioButtonEvent(int)));
+#else
+    QObject::connect(triggerButtonGroup, SIGNAL(idPressed(int)), this, SLOT(radioButtonEvent(int)));
+#endif
 }
 
 uint32_t ChannelControl::getActiveChannelMask(){

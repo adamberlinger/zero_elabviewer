@@ -114,8 +114,13 @@ Application::Application(){
     isConnected = false;
 
     QObject::connect (protocol, SIGNAL(supplyVoltageValue(double)), dataConverter, SLOT(setDestMax(double)));
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     QObject::connect (functionWidgetButtons, SIGNAL(buttonPressed(int)), this, SLOT(showFunctionWidget(int)));
     QObject::connect (functionWidgetButtons, SIGNAL(buttonPressed(int)), this, SLOT(checkConnection()));
+#else
+    QObject::connect (functionWidgetButtons, SIGNAL(idPressed(int)), this, SLOT(showFunctionWidget(int)));
+    QObject::connect (functionWidgetButtons, SIGNAL(idPressed(int)), this, SLOT(checkConnection()));
+#endif
     QObject::connect (protocol->getDeviceDescription(), SIGNAL(valuesChanged()), this, SLOT(changeTargetName()));
 }
 

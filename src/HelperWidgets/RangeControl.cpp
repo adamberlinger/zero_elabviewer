@@ -63,7 +63,11 @@ RangeControl::RangeControl(QString captionFormat, float value){
 
     QObject::connect(sliderControl, SIGNAL(valueChanged(float)), this, SLOT(inputChanged(float)));
     QObject::connect(sliderControl, SIGNAL(valueChangedDelayed(float)), this, SLOT(inputChangedDelayed(float)));
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     QObject::connect(buttonGroup, SIGNAL(buttonPressed(int)), this, SLOT(rangeChanged(int)));
+#else
+    QObject::connect(buttonGroup, SIGNAL(idPressed(int)), this, SLOT(rangeChanged(int)));
+#endif
 }
 
 void RangeControl::rangeChanged(int button){
