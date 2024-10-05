@@ -224,6 +224,15 @@ void Application::readPort(){
 }
 
 Application::~Application(){
+    delete serialPort;
+    delete pwmWindow;
+    delete pwmInputWidget;
+    delete voltmeterWindow;
+
+    serialPort = nullptr;
+    pwmWindow = nullptr;
+    pwmInputWidget = nullptr;
+    voltmeterWindow = nullptr;
 }
 
 void Application::closeEvent(QCloseEvent *event){
@@ -239,10 +248,5 @@ void Application::refreshPorts(){
 }
 
 void Application::quit(){
-    delete pwmWindow;
-    delete pwmInputWidget;
-    delete voltmeterWindow;
-    if(serialPort)
-        delete serialPort;
     qApp->quit();
 }
