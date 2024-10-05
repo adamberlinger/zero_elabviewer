@@ -21,9 +21,10 @@
 Q_DECLARE_METATYPE(QVector<double>)
 
 Application::Application(){
-
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     qmlRegisterType<DataSet>();
     qmlRegisterType<DataStream>();
+#endif
 
     dataConverter = new DataConverter(0,4096,0.0f,3.3f);
     /* adcDataConverter is not modified by initial VDDA.
