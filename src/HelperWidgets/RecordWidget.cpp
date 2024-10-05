@@ -66,7 +66,7 @@ RecordWidget::RecordWidget(QString caption, QString yAxisLabel, bool hideOnClose
     plot->lazyZoomY(0, 3.3);
 
     plot->plotLayout()->insertRow(0);
-    plot->plotLayout()->addElement(0, 0, new QCPPlotTitle(plot, caption));
+    plot->plotLayout()->addElement(0, 0, new QCPTextElement(plot, caption));
 
     plot->setFrequencyMultiplier(1.0);
     plot->xCursorLabel = "%{x'} %{u}s";
@@ -311,7 +311,7 @@ MultiRecordWidget::MultiRecordWidget(QString caption, QString yAxisLabel,
     plot->lazyZoomY(0, 3.3);
 
     plot->plotLayout()->insertRow(0);
-    plot->plotLayout()->addElement(0, 0, new QCPPlotTitle(plot, caption));
+    plot->plotLayout()->addElement(0, 0, new QCPTextElement(plot, caption));
 
     plot->setFrequencyMultiplier(1.0);
     plot->xCursorLabel = "%{x'} %{u}s";

@@ -24,7 +24,7 @@ ResponseMeasurement::ResponseMeasurement(QString caption, QString xAxisLabel, QS
     plot = new ExtendedPlot(this);
 
     plot->plotLayout()->insertRow(0);
-    plot->plotLayout()->addElement(0, 0, new QCPPlotTitle(plot, caption));
+    plot->plotLayout()->addElement(0, 0, new QCPTextElement(plot, caption));
     plot->xAxis->setLabel(xAxisLabel);
     plot->yAxis->setLabel(yAxisLabel);
     plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);

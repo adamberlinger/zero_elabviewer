@@ -79,9 +79,6 @@ ExtendedPlot::CursorSpace::CursorSpace(ExtendedPlot* plot,Cursor* prev, Cursor* 
     bracket->setLength(0.0);
 
     this->update(plot);
-
-    plot->addItem(bracket);
-    plot->addItem(text);
 }
 
 void ExtendedPlot::CursorSpace::update(ExtendedPlot* plot){
@@ -162,9 +159,6 @@ ExtendedPlot::Cursor::Cursor(double position, Cursor::Type type, ExtendedPlot* p
         text->position->setCoords(0.0, position);
     }
     text->setLayer(plot->layer("legend"));
-
-    plot->addItem(this);
-    plot->addItem(this->text);
 
     this->setPen(QPen(Qt::darkYellow));
     this->setSelectable(true);
@@ -406,34 +400,29 @@ void ExtendedPlot::saveData(){
 
         QTextStream textStream(&file);
         textStream << "Time (s)";
-        QMapIterator<double, QCPData>** it = new QMapIterator<double, QCPData>*[this->graphCount()];
+        QVector<QCPGraphDataContainer::const_iterator> it(this->graphCount());
+        QVector<QCPGraphDataContainer::const_iterator> end(this->graphCount());
         for(int i = 0;i < this->graphCount();++i){
-            it[i] = new QMapIterator<double, QCPData>(*this->graph(i)->data());
+            QSharedPointer<QCPGraphDataContainer> data = this->graph(i)->data();
+            it[i]  = data->constBegin();
+            end[i] = data->constEnd();
             textStream << ",CH" << (i+1);
         }
         textStream << "\n";
 
-        volatile int test_counter = 0;
-        while(it[0]->hasNext()){
-
-            it[0]->next();
-            textStream << (it[0]->value().key * t_mult) << "," << it[0]->value().value;
+        while(it[0] < end[0]){
+            textStream << (it[0]->key * t_mult) << "," << it[0]->value;
             for(int i = 1; i < this->graphCount();++i){
                 textStream << ",";
-                if(it[i]->hasNext()){
-                    it[i]->next();
-                    textStream << it[i]->value().value;
+                if(it[i] < end[i]){
+                    textStream << it[i]->value;
+                    ++it[i];
                 }
             }
             textStream << "\n";
-            test_counter++;
+            ++it[0];
         }
         file.close();
-
-        for(int i = 0; i < this->graphCount();++i){
-            delete it[i];
-        }
-        delete[] it;
     }
 }
 
@@ -584,7 +573,7 @@ void ExtendedPlot::selectZoomStart(QMouseEvent *event){
             }
 
             if(selectedCursorX || selectedCursorY){
-                this->axisRect(0)->setRangeDrag(0);
+                this->axisRect(0)->setRangeDrag({});
                 dragAction = DRAG_CURSOR;
             }
         }

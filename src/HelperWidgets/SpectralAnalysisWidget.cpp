@@ -45,7 +45,7 @@ SpectralAnalysisWidget::SpectralAnalysisWidget():signalAveraging(1){
     plot->setFrequencyMultiplier(1.0);
 
     plot->plotLayout()->insertRow(0);
-    plot->plotLayout()->addElement(0, 0, new QCPPlotTitle(plot, "Spectrum / FFT"));
+    plot->plotLayout()->addElement(0, 0, new QCPTextElement(plot, "Spectrum / FFT"));
 
     x = new QVector<double>(dataSize);
     y = new QVector<double>(dataSize);

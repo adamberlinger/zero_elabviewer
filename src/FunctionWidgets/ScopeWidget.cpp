@@ -65,9 +65,6 @@ ScopeWidget::ScopeWidget(Protocol* protocol, int channel, DataConverter* adcConv
     hLineTrigger->setVisible(false);
     vLineTrigger->setVisible(false);
 
-    mainPlot->addItem(vLineTrigger);
-    mainPlot->addItem(hLineTrigger);
-
     plotWidth = 100;
     mainPlot->replot();
 
