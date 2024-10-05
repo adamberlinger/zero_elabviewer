@@ -58,8 +58,11 @@ GeneratorWidget::GeneratorWidget(Protocol* protocol, int channel){
     QObject::connect (startButton, SIGNAL(pressed()), this, SLOT(startGenerator()));
     QObject::connect (stopButton, SIGNAL(pressed()), this, SLOT(stopGenerator()));
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     QObject::connect(buttonGroup, SIGNAL(buttonPressed(int)), this, SLOT(configureShape(int)));
-
+#else
+    QObject::connect(buttonGroup, SIGNAL(idPressed(int)), this, SLOT(configureShape(int)));
+#endif
     QObject::connect(voltageControl, SIGNAL(valueChangedDelayed(float)), this, SLOT(configureVoltage()));
     QObject::connect(voltageOutputEnable, SIGNAL(stateChanged(int)), this, SLOT(configureVoltage()));
 }
