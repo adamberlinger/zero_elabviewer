@@ -10,6 +10,12 @@ INCLUDEPATH += src src/DataUtils src/FunctionWidgets src/HelperWidgets
 LIBS += -lfftw3
 RESOURCES = resources/resources.qrc
 
+greaterThan(QT_MAJOR_VERSION, 5): CONFIG += qmltypes
+equals(QT_MAJOR_VERSION, 5): equals(QT_MINOR_VERSION, 15): CONFIG += qmltypes
+QML_IMPORT_NAME = ZeroElabViewer
+QML_IMPORT_VERSION = 0.7
+
+
 # Input
 SOURCES += $$files(src/*.cpp)
 SOURCES += $$files(src/DataUtils/*.cpp)

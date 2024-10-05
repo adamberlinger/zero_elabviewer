@@ -5,3 +5,7 @@ zero_elabviewer.pro.user
 # This file should be generated from firmware package
 /resources/help/help_targets.html
 env.pro
+
+zero_elabviewer_metatypes.json
+zero_elabviewer_qmltyperegistrations.cpp
+zero_elabviewer.qmltypes
