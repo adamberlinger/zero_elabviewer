@@ -78,7 +78,11 @@ FrequencyControl::FrequencyControl(QString caption, float value, bool showRealFr
     QObject::connect(slider, SIGNAL(valueChanged(int)), this, SLOT(inputValue(int)));
     QObject::connect(lineEdit, SIGNAL(editingFinished()), this, SLOT(inputValue()));
     QObject::connect(timer, SIGNAL(timeout()), this, SLOT(timerEvent()));
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     QObject::connect(buttonGroup, SIGNAL(buttonPressed(int)), this, SLOT(rangeChanged(int)));
+#else
+    QObject::connect(buttonGroup, SIGNAL(idPressed(int)), this, SLOT(rangeChanged(int)));
+#endif
 }
 
 void FrequencyControl::setRealValue(float realValue){
