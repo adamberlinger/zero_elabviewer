@@ -18,6 +18,7 @@
 #define _DATA_SET_H_
 
 #include <QtGui>
+#include <QtQml>
 #include "DataConverter.h"
 
 #define DATASET_MAX_AVG    (32)
@@ -48,6 +49,9 @@ struct BufferDescription {
 
 class DataStream : public QObject {
     Q_OBJECT
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QML_ELEMENT
+#endif
 public:
     enum DataType {
         DATA_ANALOG = 0,
@@ -86,6 +90,9 @@ public:
 
 class DataSet : public QObject{
     Q_OBJECT
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QML_ELEMENT
+#endif
 public:
     enum ApproxType {
         /** None */
