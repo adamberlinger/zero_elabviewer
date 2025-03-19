@@ -197,7 +197,8 @@ if ("${DEV_MODE}")
     # It created files useless to normal users and requires additional tools (git, xz).
     message(STATUS "Packaging tools enabled.")
 
-    set(PACKAGE_NAME "${MAIN_PROJECT_NAME_LOWER}")
+    string(REPLACE "_" "-" PACKAGE_NAME "${MAIN_PROJECT_NAME_LOWER}")
+    #set(PACKAGE_NAME "${MAIN_PROJECT_NAME_LOWER}")
     set(PACKAGE_VERSION "${PROJECT_VERSION}")
     set(PACKAGE_RELEASE "1")
     set(PACKAGE_SOURCE_ARCHIVE_FILE "${PACKAGE_NAME}_${PACKAGE_VERSION}.orig.tar.xz")
