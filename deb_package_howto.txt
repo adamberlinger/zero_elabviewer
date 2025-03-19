@@ -1,24 +1,34 @@
-Short guide on how to create Debian package. It is not complete 100% correct guide.
+Short guide on how to prepare Debian package from zero_elabviewer sources
 
-  - copy source file to `~/<package_name>-<version>` folder
-  - add following to `*.pro` file:
+## Debian source package preparation
+
+Clone or copy `zero_elabviewer` sources into `zero_elabviewer` directory
+and instruct CMake to build Debian and RPM source packages bundle
+```
+rm -rf zero_elabviewer-build
+mkdir -p zero_elabviewer-build
+(cd zero_elabviewer-build && cmake -DDEV_MODE=true ../zero_elabviewer ) || exit 1
+(cd zero_elabviewer-build && make open_build_service_bundle ) || exit 1
+```
+The source package bundle is located in `zero_elabviewer-build/target/pkg`
+directory now.
+
+## Prepare for Debian binary package build
 
 ```
-binfile.files+=zero_elabviewer
-binfile.path=/usr/bin
-
-INSTALLS += binfile
+rm -rf zero_elabviewer-deb
+mkdir -p zero_elabviewer-deb
+cp zero_elabviewer-build/target/pkg/* zero_elabviewer-deb
 ```
 
- - run `dh_make -s -c gpl -e <author_mail> --createorig` inside
-`~/<package_name>-<version>` folder
- - modify debian/rules file (requires "cdbs" package):
+## Debian binary package build
+
+Enter `cd zero_elabviewer-deb` directory with `zero-elabviewer.spec`,
+`zero-elabviewer_X.Y-Z.debian.tar.xz` and `zero-elabviewer_X.Y.orig.tar.xz`
+files.
 
 ```
-#!/usr/bin/make -f
-
-include /usr/share/cdbs/1/rules/debhelper.mk
-include /usr/share/cdbs/1/class/qmake.mk
+dpkg-source -x zero-elabviewer_X.Y-Z.dsc
+cd zero-elabviewer-X.Y
+dpkg-buildpackage
 ```
-
- - run "dpkg-buildpackage"
