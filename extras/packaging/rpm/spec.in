@@ -35,6 +35,7 @@ BuildRequires:  cmake(Qt5LinguistTools)
 BuildRequires:  gcc-c++
 BuildRequires:  hicolor-icon-theme
 BuildRequires:  pkgconfig
+BuildRequires:  pkgconfig(fftw3)
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Gui)
 BuildRequires:  pkgconfig(Qt5Network)
@@ -87,12 +88,12 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/@PACKAGE_NAME@.deskto
 # TODO: this should be generated from CMake
 %files
 %{_bindir}/@MAIN_EXECUTEBLE_NAME@
-#%{_datadir}/icons/hicolor/scalable/apps/@PACKAGE_NAME@.svg
+%{_datadir}/icons/hicolor/scalable/apps/@PACKAGE_NAME@.svg
 %{_datadir}/icons/hicolor/256x256/apps/@PACKAGE_NAME@.png
 %{_datadir}/applications/@PACKAGE_NAME@.desktop
 #%{_datadir}/metainfo/cz.cvut.fel.embedded.@PACKAGE_NAME@.metainfo.xml
 
-%license documentation/license.txt
+%license license.txt
 %doc README.md
 
 %changelog
