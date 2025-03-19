@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=@PACKAGE_NAME@
+GenericName=@GENERIC_NAME@
+Exec=@MAIN_EXECUTEBLE_NAME@
+Icon=@PACKAGE_NAME@
+Type=Application
+Comment=@GENERIC_NAME@
+Terminal=false
+Categories=Office;Education;DataVisualization;
+Keywords=electronics;education;
