@@ -181,7 +181,7 @@ if((QT_VERSION_MAJOR GREATER 4))
 endif()
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(DataPlotter)
+    qt_finalize_executable(zero_elabviewer_community)
 endif()
 
 string(REPLACE "_" "-" PACKAGE_NAME "${MAIN_PROJECT_NAME_LOWER}")
