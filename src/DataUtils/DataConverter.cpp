@@ -112,4 +112,7 @@ const char* DataConverter::getUnitPrefix(double value, double *value_out){
         *value_out *= 1e6;
         return "u";
     }
+
+    // fallback: no scaling & no prefix
+    return "";
 }
