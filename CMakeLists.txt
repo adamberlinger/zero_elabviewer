@@ -7,7 +7,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_AUTOMOC ON)
 
-set(ADAM_BELINGER Adam Berlinger <berlingeradam@gmail.com>)
+set(ADAM_BELINGER "Adam Berlinger <berlingeradam@gmail.com>")
 
 set(PROJECT_HOMEPAGE_URL "https://github.com/sdi-hackers/zero_elabviewer_community/")
 set(GENERIC_NAME "Zero eLab Viewer Community")
