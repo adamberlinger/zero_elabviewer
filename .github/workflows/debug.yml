@@ -1,0 +1,96 @@
+# Copied from https://github.com/cvut/qtrvsim/blob/0a7c0b7a0692aca29649d71cc05b2fc5a75a4e28/.github/workflows/debug.yml
+# Original file is (c) Jakub Dupak 2021-2025 and (c) Pavel Pisa 2022-2024
+
+name: Debug
+
+on: [ push, workflow_dispatch, pull_request, merge_group ]
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    # Avoid duplicate builds on PR from the same repository
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+            name: "Ubuntu Latest GCC",
+            os: ubuntu-latest,
+            build_type: "Debug",
+            cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
+            qt_version: "native",
+            qt_install_command: "sudo apt-get update && sudo apt-get install qtbase5-dev qttools5-dev libqt5serialport5-dev libqt5opengl5-dev qtdeclarative5-dev",
+            # Apt is significantly faster that aqt.
+            fftw_version: "native",
+            fftw_install_command: "sudo apt-get update && sudo apt-get install libfftw3-dev"
+          }
+
+          # TODOs that are already handled in QtRvSim:
+          # - Qt6 support
+          #  - blocked: Zero eLab Viewer doesn't currently build with Qt6
+          # - Windows and macOS support
+          #  - blocked: FFTW must be obtained from somewhere
+
+    steps:
+      - uses: actions/checkout@v4
+      - run: git submodule update --recursive --init
+
+      - name: Ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: ${{ github.ref_name }}-${{ matrix.config.name }}
+
+      - name: Install specified Qt version
+        if: matrix.config.qt_version != 'native'
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ matrix.config.qt_version }}
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-${{ matrix.config.qt_version }}-Qt
+          arch: ${{ matrix.config.qt_arch }}
+          dir: ${{ github.workspace }}/Qt
+
+      - name: Install native Qt by package manager
+        if: matrix.config.qt_version == 'native'
+        run: ${{ matrix.config.qt_install_command }}
+
+      - name: Install native FFTW by package manager
+        if: matrix.config.fftw_version == 'native'
+        run: ${{ matrix.config.fftw_install_command }}
+
+      -  name: Setup Ninja
+         if: matrix.config.build_system == 'Ninja'
+         uses: seanmiddleditch/gha-setup-ninja@v6
+
+      - name: Create Build Environment
+        run: cmake -E make_directory ${{ github.workspace }}/build
+
+      - name: Configure CMake
+        shell: bash
+        working-directory: ${{github.workspace}}/build
+        run: "cmake $GITHUB_WORKSPACE
+                    -DCMAKE_BUILD_TYPE=${{ matrix.config.build_type }}
+                    -DCMAKE_C_COMPILER=${{ matrix.config.cc }}
+                    -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }}
+                    -DCMAKE_C_COMPILER_LAUNCHER=ccache
+                    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+                    -DFORCE_COLORED_OUTPUT=true
+                    -G \"${{ matrix.config.build_system }}\""
+
+      - name: Build
+        working-directory: ${{ github.workspace }}/build
+        run: cmake --build . -j4
+
+      - name: Deploy on Windows
+        if: runner.os == 'Windows'
+        working-directory: ${{ github.workspace }}/build/target
+        shell: bash
+        run: "windeployqt \"${{ github.workspace }}/build/target/zero_elabviewer.exe\""
+
+      - name: Store created artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: target-${{ runner.os }}-qt${{ matrix.config.qt_version }}
+          path: ${{ github.workspace }}/build/target
