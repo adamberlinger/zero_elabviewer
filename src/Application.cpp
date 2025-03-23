@@ -21,9 +21,10 @@
 Q_DECLARE_METATYPE(QVector<double>)
 
 Application::Application(){
-
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     qmlRegisterType<DataSet>();
     qmlRegisterType<DataStream>();
+#endif
 
     dataConverter = new DataConverter(0,4096,0.0f,3.3f);
     /* adcDataConverter is not modified by initial VDDA.
@@ -113,8 +114,13 @@ Application::Application(){
     isConnected = false;
 
     QObject::connect (protocol, SIGNAL(supplyVoltageValue(double)), dataConverter, SLOT(setDestMax(double)));
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
     QObject::connect (functionWidgetButtons, SIGNAL(buttonPressed(int)), this, SLOT(showFunctionWidget(int)));
     QObject::connect (functionWidgetButtons, SIGNAL(buttonPressed(int)), this, SLOT(checkConnection()));
+#else
+    QObject::connect (functionWidgetButtons, SIGNAL(idPressed(int)), this, SLOT(showFunctionWidget(int)));
+    QObject::connect (functionWidgetButtons, SIGNAL(idPressed(int)), this, SLOT(checkConnection()));
+#endif
     QObject::connect (protocol->getDeviceDescription(), SIGNAL(valuesChanged()), this, SLOT(changeTargetName()));
 }
 
@@ -218,6 +224,15 @@ void Application::readPort(){
 }
 
 Application::~Application(){
+    delete serialPort;
+    delete pwmWindow;
+    delete pwmInputWidget;
+    delete voltmeterWindow;
+
+    serialPort = nullptr;
+    pwmWindow = nullptr;
+    pwmInputWidget = nullptr;
+    voltmeterWindow = nullptr;
 }
 
 void Application::closeEvent(QCloseEvent *event){
@@ -233,10 +248,5 @@ void Application::refreshPorts(){
 }
 
 void Application::quit(){
-    delete pwmWindow;
-    delete pwmInputWidget;
-    delete voltmeterWindow;
-    if(serialPort)
-        delete serialPort;
     qApp->quit();
 }

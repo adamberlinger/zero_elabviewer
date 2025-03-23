@@ -26,10 +26,17 @@ jobs:
             fftw_version: "native",
             fftw_install_command: "sudo apt-get update && sudo apt-get install libfftw3-dev"
           }
+          - {
+            name: "Ubuntu Latest GCC + Qt6",
+            os: ubuntu-latest,
+            build_type: "Debug",
+            cc: "gcc", cxx: "g++", build_system: "Unix Makefiles",
+            qt_version: "6.2.1",
+            fftw_version: "native",
+            fftw_install_command: "sudo apt-get update && sudo apt-get install libfftw3-dev"
+          }
 
           # TODOs that are already handled in QtRvSim:
-          # - Qt6 support
-          #  - blocked: Zero eLab Viewer doesn't currently build with Qt6
           # - Windows and macOS support
           #  - blocked: FFTW must be obtained from somewhere
 
@@ -51,6 +58,7 @@ jobs:
           cache-key-prefix: ${{ runner.os }}-${{ matrix.config.qt_version }}-Qt
           arch: ${{ matrix.config.qt_arch }}
           dir: ${{ github.workspace }}/Qt
+          modules: qtserialport
 
       - name: Install native Qt by package manager
         if: matrix.config.qt_version == 'native'
