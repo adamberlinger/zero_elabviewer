@@ -1,3 +1,9 @@
+zero-elabviewer-community (1.0-2) unstable; urgency=medium
+
+  * Rename to Zero eLab Viewer Community
+
+ -- Jakub Vaněk <linuxtardis@gmail.com>  Sun, 23 Mar 2025 02:26:21 +0100
+
 zero-elabviewer (1.0-1) unstable; urgency=medium
 
   * Initial Debian packaging attempt

@@ -18,13 +18,13 @@ V_DATE_RFC="$(date -R)"
 V_USER_NAME="$(git config user.name)"
 V_USER_EMAIL="$(git config user.email)"
 
-if grep -q "zero-elabviewer ($V_TXT)" $CHANGELOG_FILE; then
+if grep -q "zero-elabviewer-community ($V_TXT)" $CHANGELOG_FILE; then
   sed --in-place \
     -e '1,/^ -- .*$/s/^ -- .*$/'" -- $V_USER_NAME <$V_USER_EMAIL>  $V_DATE_RFC/" \
     $CHANGELOG_FILE
 else
   cat >$CHANGELOG_FILE.tmp <<EOF
-zero-elabviewer ($V_TXT) unstable; urgency=medium
+zero-elabviewer-community ($V_TXT) unstable; urgency=medium
 
   * Debian package updated to version $V_TXT.
 

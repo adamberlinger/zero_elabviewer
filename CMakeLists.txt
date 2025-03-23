@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 cmake_policy(VERSION 3.10)
 
-project(zero_elabviewer VERSION 1.0 LANGUAGES CXX)
+project(zero_elabviewer_community VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -9,14 +9,16 @@ set(CMAKE_AUTOMOC ON)
 
 set(ADAM_BELINGER Adam Berlinger <berlingeradam@gmail.com>)
 
-set(PROJECT_HOMEPAGE_URL "https://github.com/adamberlinger/zero_elabviewer/")
-set(GENERIC_NAME "Zero eLab Viewer")
+set(PROJECT_HOMEPAGE_URL "https://github.com/sdi-hackers/zero_elabviewer_community/")
+set(GENERIC_NAME "Zero eLab Viewer Community")
 set(LICENCE "GPL-3.0-or-later")
-set(PROJECT_DESCRIPTION "Zero eLab Viewer for Cheap SDI Instruments")
+set(PROJECT_DESCRIPTION "Zero eLab Viewer Community for Cheap SDI Instruments")
 set(LONG_DESCRIPTION
-        "Zero eLab Viewer is a PC program for displaying "
+        "Zero eLab Viewer Community is a PC program for displaying "
         "and controlling external data acquisition system through "
-        "standard communication interface such as USB CDC class.")
+        "standard communication interface such as USB CDC class."
+        "This program is a community fork of the official "
+        "Zero eLab Viewer code base.")
 
 include(cmake/CopyrightTools.cmake)
 
@@ -46,8 +48,8 @@ set(PACKAGE_OUTPUT_PATH "${EXECUTABLE_OUTPUT_PATH}/pkg"
 # C defines, respectively.
 set(MAIN_PROJECT_NAME "${PROJECT_NAME}")
 set(MAIN_PROJECT_VERSION "${PROJECT_VERSION}")
-set(MAIN_PROJECT_APPID "cz.cvut.fel.embedded.sdi.data-plotter")
-set(MAIN_PROJECT_ORGANIZATION "FEE CTU")
+set(MAIN_PROJECT_APPID "com.github.sdi-hackers.zero-elabviewer-community")
+set(MAIN_PROJECT_ORGANIZATION "SDI Hackers")
 set(MAIN_PROJECT_HOMEPAGE_URL "${PROJECT_HOMEPAGE_URL}")
 string(TOLOWER "${PROJECT_NAME}" MAIN_PROJECT_NAME_LOWER)
 string(TOUPPER "${PROJECT_NAME}" MAIN_PROJECT_NAME_UPPER)
@@ -136,34 +138,34 @@ set(QRC_FILES
 # =============================================================================
 
 # MACOS
-set(ICON_NAME zero-elabviewer)
+set(ICON_NAME zero-elabviewer-community)
 set(ICON_PATH ${CMAKE_SOURCE_DIR}/data/icons/${ICON_NAME}.icns)
 # END MACOS
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt6_add_resources(rcc_files ${QRC_FILES})
-    qt_add_executable(zero_elabviewer MANUAL_FINALIZATION ${ICON_PATH} ${PROJECT_SOURCES} ${rcc_files})
+    qt_add_executable(zero_elabviewer_community MANUAL_FINALIZATION ${ICON_PATH} ${PROJECT_SOURCES} ${rcc_files})
 else()
     qt5_add_resources(rcc_files ${QRC_FILES})
-    add_executable(zero_elabviewer ${ICON_PATH} ${PROJECT_SOURCES} ${rcc_files})
+    add_executable(zero_elabviewer_community ${ICON_PATH} ${PROJECT_SOURCES} ${rcc_files})
 endif()
 
 if(QT_VERSION_MAJOR EQUAL 6)
-qt_add_qml_module(zero_elabviewer
-    URI zero_elabviewer
+qt_add_qml_module(zero_elabviewer_community
+    URI zero_elabviewer_community
     VERSION ${PROJECT_VERSION}
     OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build
 )
 endif()
 
-target_include_directories(zero_elabviewer PUBLIC
+target_include_directories(zero_elabviewer_community PUBLIC
     src
     src/DataUtils
     src/FunctionWidgets
     src/HelperWidgets
 )
 
-target_link_libraries(zero_elabviewer PUBLIC
+target_link_libraries(zero_elabviewer_community PUBLIC
     ${QtLib}::Core
     ${QtLib}::Gui
     ${QtLib}::Qml
@@ -172,7 +174,7 @@ target_link_libraries(zero_elabviewer PUBLIC
 )
 
 if((QT_VERSION_MAJOR GREATER 4))
-    target_link_libraries(zero_elabviewer PUBLIC
+    target_link_libraries(zero_elabviewer_community PUBLIC
         ${QtLib}::PrintSupport
         ${QtLib}::Widgets
     )
@@ -187,7 +189,7 @@ string(REPLACE "_" "-" PACKAGE_NAME "${MAIN_PROJECT_NAME_LOWER}")
 # MACOS
 set_property(SOURCE ${ICON_PATH}
         PROPERTY MACOSX_PACKAGE_LOCATION Resources)
-set_target_properties(zero_elabviewer PROPERTIES
+set_target_properties(zero_elabviewer_community PROPERTIES
         MACOSX_BUNDLE true
         MACOSX_BUNDLE_GUI_IDENTIFIER cz.cvut.fel.embedded.${MAIN_PROJECT_NAME}
         MACOSX_BUNDLE_BUNDLE_NAME ${MAIN_PROJECT_NAME}
@@ -202,7 +204,7 @@ set_target_properties(zero_elabviewer PROPERTIES
 # =============================================================================
 
 if (NOT "${WASM}")
-    install(TARGETS zero_elabviewer
+    install(TARGETS zero_elabviewer_community
            RUNTIME DESTINATION bin
            BUNDLE DESTINATION ${EXECUTABLE_OUTPUT_PATH})
     install(FILES "data/icons/${PACKAGE_NAME}.svg"
