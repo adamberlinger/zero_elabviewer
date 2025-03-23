@@ -8,6 +8,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
 set(ADAM_BELINGER "Adam Berlinger <berlingeradam@gmail.com>")
+set(JAKUB_VANEK "Jakub Vaněk <linuxtardis@gmail.com>")
 
 set(PROJECT_HOMEPAGE_URL "https://github.com/adamberlinger/zero_elabviewer/")
 set(GENERIC_NAME "Zero eLab Viewer")
@@ -225,6 +226,11 @@ if (NOT "${WASM}")
     install_icon("256x256" "png")
     install_icon("512x512" "png")
 
+    configure_file("data/${MAIN_PROJECT_APPID}.metainfo.xml.in"
+            "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_APPID}.metainfo.xml")
+    install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_APPID}.metainfo.xml"
+            DESTINATION share/metainfo)
+
     configure_file(data/desktop.in
             "${EXECUTABLE_OUTPUT_PATH}/${PACKAGE_NAME}.desktop")
     install(FILES "${EXECUTABLE_OUTPUT_PATH}/${PACKAGE_NAME}.desktop"
@@ -248,7 +254,7 @@ if ("${DEV_MODE}")
     set(PACKAGE_TOPLEVEL_DIR "${PACKAGE_NAME}-${PACKAGE_VERSION}")
     set(PACKAGE_DESCRIPTION "${PROJECT_DESCRIPTION}")
     set(PACKAGE_LONG_DESCRIPTION "${LONG_DESCRIPTION}")
-    set(PACKAGE_MAINTAINER "${ADAM_BELINGER}")
+    set(PACKAGE_MAINTAINER "${JAKUB_VANEK}")
     set(PACKAGE_URL "${PROJECT_HOMEPAGE_URL}")
     set(PACKAGE_GIT "${PROJECT_HOMEPAGE_URL}")
     set(PACKAGE_LICENCE "${LICENCE}")

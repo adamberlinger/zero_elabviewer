@@ -98,7 +98,7 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/@PACKAGE_NAME@.deskto
 %{_datadir}/icons/hicolor/256x256/apps/@PACKAGE_NAME@.png
 %{_datadir}/icons/hicolor/512x512/apps/@PACKAGE_NAME@.png
 %{_datadir}/applications/@PACKAGE_NAME@.desktop
-#%{_datadir}/metainfo/@MAIN_PROJECT_APPID@.metainfo.xml
+%{_datadir}/metainfo/@MAIN_PROJECT_APPID@.metainfo.xml
 
 %license license.txt
 %doc README.md

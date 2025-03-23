@@ -1,0 +1,8 @@
+# zero_elabviewer is a gui tool so there is no manual
+zero-elabviewer: no-manual-page usr/bin/zero_elabviewer
+
+# this is not a typo
+zero-elabviewer: spelling-error-in-binary
+
+# we do not want <provide> for a generic STM32 USB VID:PID
+zero-elabviewer: appstream-metadata-missing-modalias-provide
