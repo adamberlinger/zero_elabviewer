@@ -142,6 +142,10 @@ set(ICON_NAME zero-elabviewer-community)
 set(ICON_PATH ${CMAKE_SOURCE_DIR}/data/icons/baked/${ICON_NAME}.icns)
 # END MACOS
 
+if(WIN32)
+    set(PROJECT_SOURCES ${PROJECT_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/data/resources.rc)
+endif()
+
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt6_add_resources(rcc_files ${QRC_FILES})
     qt_add_executable(zero_elabviewer_community MANUAL_FINALIZATION ${ICON_PATH} ${PROJECT_SOURCES} ${rcc_files})
