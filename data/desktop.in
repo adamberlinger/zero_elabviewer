@@ -1,10 +1,20 @@
 [Desktop Entry]
-Name=@PACKAGE_NAME@
-GenericName=@GENERIC_NAME@
-Exec=@MAIN_EXECUTEBLE_NAME@
-Icon=@PACKAGE_NAME@
 Type=Application
-Comment=@GENERIC_NAME@
+
+Name=@GENERIC_NAME@
+GenericName=Software-defined-instrument control app
+GenericName[cs]=Aplikace pro ovládání softwarově definovaných přístrojů
+Icon=@PACKAGE_NAME@
+
+Exec=@MAIN_EXECUTEBLE_NAME@
 Terminal=false
-Categories=Office;Education;DataVisualization;
-Keywords=electronics;education;
+StartupWMClass=@MAIN_EXECUTEBLE_NAME@
+StartupNotify=true
+
+Comment=Interact with F0-Lab and other SDI lab instruments
+Comment[cz]=Pracujte s F0-Lab a dalšími SDI laboratorními přístroji
+
+Categories=Education;Electronics;DataVisualization;
+
+Keywords=oscilloscope;voltmeter;generator
+Keywords[cs]=osciloskop;voltmetr;generátor
