@@ -3,3 +3,6 @@ zero-elabviewer-community: no-manual-page [usr/bin/zero_elabviewer_community]
 
 # we do not want <provide> for a generic STM32 USB VID:PID
 zero-elabviewer-community: appstream-metadata-missing-modalias-provide
+
+# this is not a typo
+zero-elabviewer-community: spelling-error-in-binary
