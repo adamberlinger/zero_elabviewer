@@ -5,6 +5,7 @@
     <file>img/sem_red.png</file>
     <file>img/ctu_logo_small_en.png</file>
     <file>img/ctu_logo_tiny_en.png</file>
+    <file alias="icon.ico">../data/icons/baked/zero-elabviewer.ico</file>
     <file>about.html</file>
     <file alias="help/help.html">help/help_cs.html</file>
     <file>help/help_targets.html</file>
