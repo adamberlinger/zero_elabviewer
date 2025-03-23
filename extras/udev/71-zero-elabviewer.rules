@@ -1,0 +1,2 @@
+# F0-Lab - STM32F042F6P6 - VCP mode
+SUBSYSTEM=="tty", ACTION=="add", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", TAG+="uaccess", ENV{ID_MM_DEVICE_MANUAL_SCAN_ONLY}="1"
