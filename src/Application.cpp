@@ -49,9 +49,9 @@ Application::Application(){
     this->setMinimumSize(300,200);
 
 #ifdef APP_RC_VERSION
-    setWindowTitle(QString("Zero eLab Viewer v%1.%2rc%3").arg(APP_MAJOR_VERSION).arg(APP_MINOR_VERSION).arg(APP_RC_VERSION));
+    setWindowTitle(QString("Zero eLab Viewer Community v%1.%2rc%3").arg(APP_MAJOR_VERSION).arg(APP_MINOR_VERSION).arg(APP_RC_VERSION));
 #else
-    setWindowTitle(QString("Zero eLab Viewer v%1.%2").arg(APP_MAJOR_VERSION).arg(APP_MINOR_VERSION));
+    setWindowTitle(QString("Zero eLab Viewer Community v%1.%2").arg(APP_MAJOR_VERSION).arg(APP_MINOR_VERSION));
 #endif
 
     protocol = new Protocol(1024);
