@@ -228,6 +228,11 @@ if (NOT "${WASM}")
     install_icon("256x256" "png")
     install_icon("512x512" "png")
 
+    configure_file("data/${MAIN_PROJECT_APPID}.metainfo.xml.in"
+            "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_APPID}.metainfo.xml")
+    install(FILES "${EXECUTABLE_OUTPUT_PATH}/${MAIN_PROJECT_APPID}.metainfo.xml"
+            DESTINATION share/metainfo)
+
     configure_file(data/desktop.in
             "${EXECUTABLE_OUTPUT_PATH}/${PACKAGE_NAME}.desktop")
     install(FILES "${EXECUTABLE_OUTPUT_PATH}/${PACKAGE_NAME}.desktop"
