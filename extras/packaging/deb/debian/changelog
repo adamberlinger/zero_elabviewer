@@ -1,0 +1,5 @@
+zero-elabviewer (1.0-1) unstable; urgency=medium
+
+  * Initial Debian packaging attempt
+
+ -- Pavel Pisa <pisa@fel.cvut.cz>  Wed, 19 Mar 2025 01:58:44 +0100
