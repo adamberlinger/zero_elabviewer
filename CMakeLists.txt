@@ -139,7 +139,7 @@ set(QRC_FILES
 
 # MACOS
 set(ICON_NAME zero-elabviewer-community)
-set(ICON_PATH ${CMAKE_SOURCE_DIR}/data/icons/${ICON_NAME}.icns)
+set(ICON_PATH ${CMAKE_SOURCE_DIR}/data/icons/baked/${ICON_NAME}.icns)
 # END MACOS
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -207,12 +207,22 @@ if (NOT "${WASM}")
     install(TARGETS zero_elabviewer_community
            RUNTIME DESTINATION bin
            BUNDLE DESTINATION ${EXECUTABLE_OUTPUT_PATH})
-    install(FILES "data/icons/${PACKAGE_NAME}.svg"
-           DESTINATION "share/icons/hicolor/scalable/apps"
-           RENAME "${PACKAGE_NAME}.svg")
-    install(FILES "data/icons/${PACKAGE_NAME}.png"
-            DESTINATION "share/icons/hicolor/256x256/apps"
-            RENAME "${PACKAGE_NAME}.png")
+
+    function(install_icon dimensions extension)
+        install(FILES "data/icons/baked/${dimensions}.${extension}"
+               DESTINATION "share/icons/hicolor/${dimensions}/apps"
+               RENAME "${PACKAGE_NAME}.${extension}")
+    endfunction()
+    install_icon("scalable" "svg")
+    install_icon("16x16" "png")
+    install_icon("24x24" "png")
+    install_icon("32x32" "png")
+    install_icon("48x48" "png")
+    install_icon("64x64" "png")
+    install_icon("128x128" "png")
+    install_icon("256x256" "png")
+    install_icon("512x512" "png")
+
     configure_file(data/desktop.in
             "${EXECUTABLE_OUTPUT_PATH}/${PACKAGE_NAME}.desktop")
     install(FILES "${EXECUTABLE_OUTPUT_PATH}/${PACKAGE_NAME}.desktop"
