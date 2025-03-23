@@ -31,6 +31,30 @@ On Ubuntu, following package might be needed to run app properly:
 sudo apt-get install libxcb-xinerama0
 ```
 
+## Troubleshooting
+
+### Permission denied on Linux
+
+On Linux, you may receive the following error message when opening a serial port:
+
+> Unable to connect to COM port:
+> Permission denied
+
+This may happen if you connect to a kit other than F0-Lab.
+To resolve this, add your user to the relevant system group:
+
+* for Fedora, Debian and Ubuntu:
+  ```sh
+  sudo usermod -a -G dialout $USER
+  ```
+* for Arch Linux:
+  ```sh
+  sudo usermod -a -G uucp $USER
+  ```
+
+Then, you need to log out and log in again. Afterwards,
+the connection should start working.
+
 ## Copyright
 
 Developed as a part of a student project at Department of Measurement,
