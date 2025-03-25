@@ -10,7 +10,7 @@ set(CMAKE_AUTOMOC ON)
 set(ADAM_BELINGER "Adam Berlinger <berlingeradam@gmail.com>")
 set(JAKUB_VANEK "Jakub Vaněk <linuxtardis@gmail.com>")
 
-set(PROJECT_HOMEPAGE_URL "https://github.com/adamberlinger/zero_elabviewer/")
+set(PROJECT_HOMEPAGE_URL "https://github.com/cvut-fel-sdi/zero_elabviewer/")
 set(GENERIC_NAME "Zero eLab Viewer")
 set(LICENCE "GPL-3.0-or-later")
 set(PROJECT_DESCRIPTION "Zero eLab Viewer for Cheap SDI Instruments")
