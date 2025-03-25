@@ -1,8 +1,16 @@
 # Zero eLab Viewer
 
-Zero eLab Viewer is a PC program for displaying and controlling external
-data acquisition system through standard communication
-interface such as USB CDC class.
+Zero eLab Viewer is a PC program for displaying and
+controlling external data acquisition system through standard
+communication interface such as USB CDC class.
+
+This project has been started by Adam Berlinger under lead of
+[doc. Jan Fischer](https://meas.fel.cvut.cz/index.php/fischer)
+at the [Department of Measurement](https://meas.fel.cvut.cz/) of
+the [Faculty of Electrical Engineering](https://fel.cvut.cz/cs)
+at the [Czech Technical University in Prague](https://www.cvut.cz/)
+
+The original sources are available at [@adamberlinger/zero_elabviewer](https://github.com/adamberlinger/zero_elabviewer).
 
 ## Supported devices
 

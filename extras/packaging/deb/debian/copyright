@@ -1,7 +1,7 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: zero_elabviewer
+Upstream-Name: Zero eLab Viewer
 Upstream-Contact: Jakub Vanek <linuxtardis@gmail.com>
-Source: https://github.com/adamberlinger/zero_elabviewer
+Source: https://github.com/cvut-fel-sdi/zero_elabviewer
 
 Files: *
 Copyright: 2016-2024 Adam Berlinger <berlingeradam@gmail.com>
