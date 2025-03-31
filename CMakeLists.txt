@@ -4,7 +4,7 @@ cmake_policy(VERSION 3.10)
 project(zero_elabviewer VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_AUTOMOC ON)
 
 set(ADAM_BELINGER "Adam Berlinger <berlingeradam@gmail.com>")
