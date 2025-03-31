@@ -142,7 +142,13 @@ set(ICON_PATH ${CMAKE_SOURCE_DIR}/data/icons/baked/${ICON_NAME}.icns)
 # END MACOS
 
 if(WIN32)
-    set(PROJECT_SOURCES ${PROJECT_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/data/resources.rc)
+    set(PROJECT_SOURCES ${PROJECT_SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/resources.rc)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/resources.rc.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/resources.rc
+                   @ONLY)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/data/icons/baked/zero-elabviewer.ico
+                   ${CMAKE_CURRENT_BINARY_DIR}/icon.ico
+                   COPYONLY)
 endif()
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
