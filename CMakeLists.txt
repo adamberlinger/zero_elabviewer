@@ -202,6 +202,12 @@ set_target_properties(zero_elabviewer PROPERTIES
         )
 # END MACOS
 
+# WIN32
+set_target_properties(zero_elabviewer PROPERTIES
+        WIN32_EXECUTABLE TRUE
+        )
+# END WIN32
+
 # =============================================================================
 # Installation
 # =============================================================================
