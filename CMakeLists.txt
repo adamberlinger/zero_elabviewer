@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 cmake_policy(VERSION 3.10)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 project(zero_elabviewer VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -63,9 +65,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Gui Qml SerialPort)
 find_package(Qt${QT_VERSION_MAJOR} OPTIONAL_COMPONENTS PrintSupport Widgets)
 set(QtLib "Qt${QT_VERSION_MAJOR}")
 
-find_package(PkgConfig REQUIRED)
-pkg_search_module(FFTW REQUIRED fftw3 IMPORTED_TARGET)
-include_directories(PkgConfig::FFTW)
+find_package(FFTW REQUIRED DOUBLE_LIB)
 
 # =============================================================================
 # Sources
@@ -179,7 +179,7 @@ target_link_libraries(zero_elabviewer PUBLIC
     ${QtLib}::Gui
     ${QtLib}::Qml
     ${QtLib}::SerialPort
-    PkgConfig::FFTW
+    FFTW::Double
 )
 
 if((QT_VERSION_MAJOR GREATER 4))
