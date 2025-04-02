@@ -45,7 +45,5 @@ icotool \
     baked/24x24.png \
     baked/32x32.png \
     baked/48x48.png \
-    baked/64x64.png \
-    baked/128x128.png \
     baked/256x256.png \
     || exit 1
