@@ -1,0 +1,64 @@
+# Copied from https://github.com/jirimaier/DataPlotter/blob/72a6e89e2d03672d576828264e84514dbe2729f3/.github/workflows/build-windows.yml
+# Original file is (c) Jiri Maier 2025
+
+name: Modern Windows build
+
+on: [ push, workflow_dispatch, pull_request, merge_group ]
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up MSVC environment
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+
+    - name: Set up Python 3.13+
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.13"
+
+    - name: Install FFTW with vcpkg
+      uses: johnwason/vcpkg-action@v6
+      id: vcpkg
+      with:
+        pkgs: fftw3
+        triplet: x64-windows
+        token: ${{ github.token }}
+        github-binarycache: true
+
+    - name: Install specified Qt version
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: 5.15.2
+        arch: win64_msvc2019_64
+        cache: true
+        dir: ${{ github.workspace }}/qt
+
+    - name: Configure CMake
+      run: |
+        cmake -S . ^
+              -B build ^
+              -G Ninja ^
+              -DCMAKE_BUILD_TYPE=Release ^
+              ${{ steps.vcpkg.outputs.vcpkg-cmake-config }}
+      shell: cmd
+
+    - name: Build project
+      run: cmake --build build -j 4
+      shell: cmd
+
+    - name: Package
+      working-directory: ${{ github.workspace }}/build/target
+      run: |
+        windeployqt.exe --release --compiler-runtime zero_elabviewer.exe
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: zero_elabviewer_win64
+        path: "${{ github.workspace }}/build/target"

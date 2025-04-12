@@ -1,0 +1,61 @@
+name: WinXP build
+
+on: [ push, workflow_dispatch, pull_request, merge_group ]
+
+jobs:
+  build:
+    name: Windows XP compatible build
+    runs-on: windows-latest
+    steps:
+      - name: Checkout main repository
+        uses: actions/checkout@v4
+
+      - name: Checkout build repository
+        uses: actions/checkout@v4
+        with:
+          repository: cvut-fel-sdi/zero_elabviewer_winbuild
+          path: toolchain
+
+      - name: Setup PATH
+        shell: bash
+        run: |
+          echo "${{ github.workspace }}/toolchain/qt/bin" >> $GITHUB_PATH
+          echo "${{ github.workspace }}/toolchain/gcc/bin" >> $GITHUB_PATH
+
+      - name: Create Build Environment
+        run: mkdir -p ${{ github.workspace }}/build
+
+      - name: Configure CMake
+        shell: bash
+        working-directory: ${{ github.workspace }}/build
+        run: "cmake $GITHUB_WORKSPACE
+                    -DCMAKE_BUILD_TYPE=Release
+                    -DCMAKE_CXX_COMPILER=g++
+                    -DFFTW_INCLUDE_DIRS=../toolchain/fftw
+                    -DFFTW_DOUBLE_LIB=../toolchain/fftw/libfftw3-3.dll
+                    -G Ninja"
+
+      - name: Build
+        working-directory: ${{ github.workspace }}/build
+        run: cmake --build . -j4
+
+      - name: Package
+        working-directory: ${{ github.workspace }}/build
+        run: |
+          mkdir package
+          cp target/zero_elabviewer.exe package/
+          cp ${{ github.workspace }}/toolchain/fftw/libfftw3-3.dll package/
+          cd package
+          windeployqt.exe --release --compiler-runtime zero_elabviewer.exe
+          rm -r bearer
+          rm -r iconengines
+          rm -r imageformats
+          rm -r translations
+          rm opengl32sw.dll
+          rm D3Dcompiler_47.dll
+          rm Qt5Svg.dll
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zero_elabviewer_win32
+          path: "${{ github.workspace }}/build/package"
