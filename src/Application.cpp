@@ -47,10 +47,12 @@ Application::Application(){
     aboutMenu = menuBar()->addMenu(tr("&About"));
     aboutMenu->addAction(helpAction = new QAction(tr("&Help"),this));
     aboutMenu->addAction(targetHelpAction = new QAction(tr("&Target help"),this));
+    aboutMenu->addAction(pinoutAction = new QAction(tr("&Pinout"), this));
     aboutMenu->addAction(aboutAction = new QAction(tr("&About"),this));
     aboutWindow = new AboutWindow();
     helpWindow = new HelpWindow("qrc:/help/help.html");
     targetHelpWindow = new HelpWindow("qrc:/help/help_targets.html");
+    pinoutWindow = new PinoutWindow();
 
     this->setMinimumSize(300,200);
 
@@ -95,6 +97,7 @@ Application::Application(){
     QObject::connect (aboutAction, SIGNAL(triggered()), aboutWindow, SLOT(show()));
     QObject::connect (helpAction, SIGNAL(triggered()), helpWindow, SLOT(show()));
     QObject::connect (targetHelpAction, SIGNAL(triggered()), targetHelpWindow, SLOT(show()));
+    QObject::connect (pinoutAction, SIGNAL(triggered()), pinoutWindow, SLOT(show()));
     QObject::connect (bootloaderButton, SIGNAL(pressed()), this, SLOT(enterBootloader()));
 
     scopeWidget = new ScopeWidget(protocol, 1, dataConverter);
@@ -141,6 +144,13 @@ void Application::changeTargetName(){
         bool enabled = protocol->getDeviceDescription()
             ->hasCapability((DeviceDescription::Capabilities)functionIds[i]);
         functionWidgetButtons->button(i+1)->setEnabled(enabled);
+    }
+    const Pinout* p = protocol->getPinout();
+    if(p){
+      pinoutWindow->displayPinout(*p);
+    }
+    else {
+      pinoutWindow->clearPinout();
     }
 }
 

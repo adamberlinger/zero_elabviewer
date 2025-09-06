@@ -74,6 +74,8 @@ find_package(FFTW REQUIRED DOUBLE_LIB)
 set(PROJECT_SOURCES
     src/AboutWindow.cpp
     src/AboutWindow.h
+    src/PinoutWindow.cpp
+    src/PinoutWindow.h
     src/Application.cpp
     src/Application.h
     src/DataUtils/DataAveraging.h

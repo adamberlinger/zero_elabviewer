@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 #include "Protocol.h"
+#include "Pinout.h"
 #include <iostream>
 
 BinaryTransfer::BinaryTransfer(int channel){
@@ -71,6 +72,7 @@ DeviceDescription::~DeviceDescription(){
 
 Protocol::Protocol(int bufferSize):bufferSize(bufferSize){
     this->device = NULL;
+    this->devicePinout = NULL;
     this->buffer =  new uint8_t[bufferSize];
     this->coreState.last_command_valid = false;
 }
@@ -253,6 +255,22 @@ void Protocol::coreTransfer(BinaryTransfer* transfer){
                 deviceDescription.capabilities = src_value;
                 coreState.last_command_valid = false;
                 deviceDescription.valuesChanged();
+            }
+            this->command('G',0,'P');
+            coreState.last_command = 'P';
+            coreState.last_command_valid = true;
+        }
+        else if(coreState.last_command == 'P'){
+            if(this->devicePinout) delete this->devicePinout;
+            this->devicePinout = Pinout::fromEncoded(transfer->getData(), transfer->getSize());
+
+            if(this->devicePinout){
+              /* TODO: move to different signal */
+              deviceDescription.valuesChanged();
+              qDebug() << *this->devicePinout;
+            }
+            else{
+              qDebug() << "Failed to decode pinout";
             }
         }
     }

@@ -33,6 +33,7 @@
 #include "PulseCounterWidget.h"
 #include "AboutWindow.h"
 #include "HelpWindow.h"
+#include "PinoutWindow.h"
 
 /**
  * \brief Main application class
@@ -56,10 +57,12 @@ private:
     QMenu *aboutMenu;
     QAction *helpAction;
     QAction *targetHelpAction;
+    QAction *pinoutAction;
     QAction *aboutAction;
     AboutWindow* aboutWindow;
     HelpWindow* helpWindow;
     HelpWindow* targetHelpWindow;
+    PinoutWindow* pinoutWindow;
 
     QBoxLayout *mainLayout;;
     QBoxLayout *leftLayout;;

@@ -19,6 +19,7 @@
 
 #include <stdint.h>
 #include <QtGui>
+#include "Pinout.h"
 
 class BinaryTransfer{
 protected:
@@ -94,6 +95,7 @@ protected:
     BinaryTransfer* currentTransfer;
     Command currentCommand;
     int binarySize;
+    Pinout* devicePinout;
 
     void processChunk(int size);
     void coreTransfer(BinaryTransfer* transfer);
@@ -108,6 +110,7 @@ public:
     Protocol(int bufferSize);
     void setDevice(QIODevice* device);
     void processData();
+    const Pinout* getPinout() const {return devicePinout; }
     DeviceDescription* getDeviceDescription(){return &deviceDescription;}
     void command(uint8_t cmd,int channel,uint32_t value);
     bool isConnected(){return device != NULL;}
