@@ -21,7 +21,13 @@ ResponseMeasurement::ResponseMeasurement(QString caption, QString xAxisLabel, QS
     QString xUnits,QString yUnits){
 
     this->setLayout(mainLayout = new QHBoxLayout());
-    plot = new ExtendedPlot(this);
+    plot = new ExtendedPlot(this,
+        "%{x'} %{u}V",
+        "ΔV = %{x'} %{u}V",
+        "%{y'} %{u}V",
+        "ΔV = %{y'} %{u}V");
+
+    plot->setFrequencyMultiplier(1.0);
 
     plot->plotLayout()->insertRow(0);
     plot->plotLayout()->addElement(0, 0, new QCPTextElement(plot, caption));
