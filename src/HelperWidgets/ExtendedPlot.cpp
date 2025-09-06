@@ -221,9 +221,19 @@ ExtendedPlot::Cursor::~Cursor(){
 
 }
 
-ExtendedPlot::ExtendedPlot(QWidget* parent):QCustomPlot(parent),
-    xCursorLabel("%{x'} %{u}s"),yCursorLabel("%{y} V"),
-    xCursorSpaceLabel("f = %{f'} %{uf}Hz\nΔt = %{x'} %{u}s"),yCursorSpaceLabel("ΔV = %{y'} %{u}V"){
+ExtendedPlot::ExtendedPlot(QWidget* parent):ExtendedPlot(parent,
+    "%{x'} %{u}s",
+    "f = %{f'} %{uf}Hz\nΔt = %{x'} %{u}s",
+    "%{y} V",
+    "ΔV = %{y'} %{u}V"){
+
+}
+
+ExtendedPlot::ExtendedPlot(QWidget* parent, const char* xCursorLabelStr,
+        const char* xCursorSpaceLabelStr, const char* yCusorLabelStr,
+        const char* yCursorSpaceLabelStr):QCustomPlot(parent),
+        xCursorLabel(xCursorLabelStr),yCursorLabel(yCusorLabelStr),
+        xCursorSpaceLabel(xCursorSpaceLabelStr),yCursorSpaceLabel(yCursorSpaceLabelStr){
 
     userZoomed = false;
     lazyZoomSetting = false;

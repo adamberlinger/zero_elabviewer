@@ -72,7 +72,7 @@ VoltmeterWidget::VoltmeterWidget(Protocol* protocol,int channel, DataConverter* 
     recordWidget->setWindowTitle("Average Voltage");
     QObject::connect (showRecordButton, SIGNAL(pressed()), recordWidget, SLOT(show()));
 
-    responseMeasurement = new ResponseMeasurement("DC analysis","Voltage (V)","Voltage (V)","V","V");
+    responseMeasurement = new ResponseMeasurement("DC analysis","Voltage input (V)","Voltage output (V)","V","V");
     responseMeasurement->setWindowTitle("DC analysis");
 
     QObject::connect (showDCButton, SIGNAL(pressed()), responseMeasurement, SLOT(show()));

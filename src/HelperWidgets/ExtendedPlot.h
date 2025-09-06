@@ -126,6 +126,9 @@ public:
     void updateCursorLabels(conv_double_callback_t xAxisConvert, conv_double_callback_t yAxisConvert);
 
     ExtendedPlot(QWidget* parent=0);
+    ExtendedPlot(QWidget* parent, const char* xCursorLabelStr,
+        const char* xCursorSpaceLabelStr, const char* yCusorLabelStr,
+        const char* yCursorSpaceLabelStr);
     void lazyZoomX(double start, double end);
     void lazyZoomY(double start, double end);
     void resetZoom(double x1, double y1, double x2, double y2);
