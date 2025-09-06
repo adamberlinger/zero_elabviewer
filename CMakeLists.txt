@@ -83,6 +83,8 @@ set(PROJECT_SOURCES
     src/DataUtils/DataSet.h
     src/DataUtils/LiveJSScript.cpp
     src/DataUtils/LiveJSScript.h
+    src/DataUtils/Pinout.cpp
+    src/DataUtils/Pinout.h
     src/DataUtils/Protocol.cpp
     src/DataUtils/Protocol.h
     src/DataUtils/SignalMeasurement.cpp
