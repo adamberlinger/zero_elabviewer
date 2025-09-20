@@ -29,7 +29,6 @@ class ResponseMeasurement : public QWidget {
 protected:
     ExtendedPlot* plot;
     QBoxLayout* mainLayout;
-    QBoxLayout* controlLayout;
     QWidget* sidePanel;
 
     QPushButton* startButton;
@@ -47,17 +46,22 @@ protected:
     QVector<double> *xValues;
     QVector<double> *yValues;
 
-    volatile float readedValue;
+    volatile float readedXValue;
+    volatile float readedYValue;
 private slots:
     void startDC();
     void step();
 public slots:
-    void input(float value);
+    void inputX(float value);
+    void inputY(float value);
+    void inputAsOutput(bool isYAxis);
 signals:
     void startSignal();
     void forceInput();
     void output(float value);
 public:
+    QGridLayout* controlLayout;
+    int controlRows;
     ResponseMeasurement(QString caption, QString xAxisLabel, QString yAxisLabel,
         QString xUnits,QString yUnits);
     virtual ~ResponseMeasurement();

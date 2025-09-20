@@ -41,14 +41,13 @@ ResponseMeasurement::ResponseMeasurement(QString caption, QString xAxisLabel, QS
     mainLayout->addWidget(plot,1);
     mainLayout->addWidget(sidePanel = new QWidget(this),0);
 
-    sidePanel->setLayout(controlLayout = new QVBoxLayout());
-    controlLayout->addWidget(delayControl = new SliderControl("Delay %1 ms",20,1,1000,1));
-    controlLayout->addWidget(stepsControl = new SliderControl("Steps: %1",100,2,1000,1));
-    controlLayout->addWidget(startValueControl = new SliderControl("Start voltage %1 V",0,0,3.3,0.001));
-    controlLayout->addWidget(stopValueControl = new SliderControl("Stop voltage %1 V",3.3,0,3.3,0.001));
-    controlLayout->addWidget(startButton = new QPushButton("Start"));
-
-    controlLayout->addStretch(1);
+    controlRows = 0;
+    sidePanel->setLayout(controlLayout = new QGridLayout());
+    controlLayout->addWidget(delayControl = new SliderControl("Delay %1 ms",20,1,1000,1), controlRows++, 0, 1, 2);
+    controlLayout->addWidget(stepsControl = new SliderControl("Steps: %1",100,2,1000,1), controlRows++, 0, 1, 2);
+    controlLayout->addWidget(startValueControl = new SliderControl("Start voltage %1 V",0,0,3.3,0.001), controlRows++, 0, 1, 2);
+    controlLayout->addWidget(stopValueControl = new SliderControl("Stop voltage %1 V",3.3,0,3.3,0.001), controlRows++, 0, 1, 2);
+    controlLayout->addWidget(startButton = new QPushButton("Start"), controlRows++, 0, 1, 2);
 
     QObject::connect (startButton, SIGNAL(pressed()), this, SLOT(startDC()));
 
@@ -72,39 +71,53 @@ void ResponseMeasurement::startDC(){
     if(yValues){
         delete yValues;
     }
-    xValues = new QVector<double>(this->numSteps);
-    yValues = new QVector<double>(this->numSteps);
+    xValues = new QVector<double>();
+    xValues->reserve(this->numSteps);
+    yValues = new QVector<double>();
+    yValues->reserve(this->numSteps);
     timer->start(100);
 
-
-    (*xValues)[index] = currentOutput;
     this->output(currentOutput);
 }
 
 void ResponseMeasurement::step(){
-    bool done = false;
     if(this->numSteps){
         this->numSteps--;
-        done = true;
     }
     if(this->numSteps){
         timer->start((int)delayControl->getValue());
         currentOutput+=outputStep;
-        (*xValues)[index+1] = currentOutput;
         this->output(currentOutput);
     }
-    /* TODO: rewrite this !!!! */
-    (*yValues)[index] = (double)readedValue;
+    /* TODO: check that X&Y values received correctly */
+    xValues->append(readedXValue);
+    yValues->append(readedYValue);
     index++;
 
-    if(done){
-        plot->graph(0)->setData(*xValues,*yValues);
-        plot->replot();
-    }
+    /* Setting alreadySorted = true, allows display
+     * of non-function graph (multiple y-values for x).
+     * This usually happens due to measurement error,
+     * when x-axis value comes from measurement
+     */
+    plot->graph(0)->setData(*xValues,*yValues,true);
+    plot->replot();
 }
 
-void ResponseMeasurement::input(float value){
-    this->readedValue = value;
+void ResponseMeasurement::inputX(float value){
+    this->readedXValue = value;
+}
+
+void ResponseMeasurement::inputY(float value){
+    this->readedYValue = value;
+}
+
+void ResponseMeasurement::inputAsOutput(bool isYAxis){
+    if(isYAxis){
+        this->readedYValue = currentOutput;
+    }
+    else {
+        this->readedXValue = currentOutput;
+    }
 }
 
 ResponseMeasurement::~ResponseMeasurement(){

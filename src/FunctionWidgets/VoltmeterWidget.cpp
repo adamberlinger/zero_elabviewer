@@ -18,13 +18,16 @@
 #include <iostream>
 #include <cmath>
 
-static const char* select_voltage[] = {
+#define VOLTAGE_LIST_SIZE   (7)
+
+static const char* select_voltage[VOLTAGE_LIST_SIZE] = {
     "Voltage1",
     "Voltage2",
     "Voltage3",
     "Reference voltage",
     "V2 - V1",
     "V3 - V2",
+    "Input voltage (DAC)"
 };
 
 /* Function to filter voltage values to reasonable bounds.
@@ -46,6 +49,9 @@ VoltmeterWidget::VoltmeterWidget(Protocol* protocol,int channel, DataConverter* 
     this->setLayout(mainLayout = new QVBoxLayout);
 
     averageSamples = new SliderControl("Number of samples: %1",1.0f, 1.0f,256.0f,1.0f);
+    responseMeasurement = new ResponseMeasurement("DC analysis","Voltage input (V)","Voltage output (V)","V","V");
+    responseMeasurement->setWindowTitle("DC analysis");
+
 
     mainLayout->addWidget(voltageLabel = new QLabel("Voltage1: "));
     mainLayout->addWidget(voltageLabel2 = new QLabel("Voltage2: "));
@@ -59,8 +65,13 @@ VoltmeterWidget::VoltmeterWidget(Protocol* protocol,int channel, DataConverter* 
     mainLayout->addWidget(stopButton = new QPushButton("Stop"));
     mainLayout->addWidget(showRecordButton = new QPushButton("Show recording"));
     mainLayout->addWidget(showDCButton = new QPushButton("Show DC analysis"));
-    mainLayout->addWidget(new QLabel("DC analysis source:"));
-    mainLayout->addWidget(recordSelect = new QComboBox());
+
+    responseMeasurement->controlLayout->addWidget(new QLabel("DC analysis source:"), responseMeasurement->controlRows++, 0, 1, 2);
+    responseMeasurement->controlLayout->addWidget(new QLabel("x axis:"), responseMeasurement->controlRows, 0, 1, 1);
+    responseMeasurement->controlLayout->addWidget(recordXSelect = new QComboBox(), responseMeasurement->controlRows++, 1, 1, 1);
+    responseMeasurement->controlLayout->addWidget(new QLabel("Y axis:"), responseMeasurement->controlRows, 0, 1, 1);
+    responseMeasurement->controlLayout->addWidget(recordYSelect = new QComboBox(), responseMeasurement->controlRows++, 1, 1, 1);
+    responseMeasurement->controlLayout->setRowStretch(responseMeasurement->controlRows, 1);
 
     QObject::connect (protocol, SIGNAL(binaryReceived()), this, SLOT(displayData()));
     QObject::connect (startButton, SIGNAL(pressed()), this, SLOT(startVoltmeter()));
@@ -72,23 +83,31 @@ VoltmeterWidget::VoltmeterWidget(Protocol* protocol,int channel, DataConverter* 
     recordWidget->setWindowTitle("Average Voltage");
     QObject::connect (showRecordButton, SIGNAL(pressed()), recordWidget, SLOT(show()));
 
-    responseMeasurement = new ResponseMeasurement("DC analysis","Voltage input (V)","Voltage output (V)","V","V");
-    responseMeasurement->setWindowTitle("DC analysis");
-
     QObject::connect (showDCButton, SIGNAL(pressed()), responseMeasurement, SLOT(show()));
-    QObject::connect (this, SIGNAL(yieldVoltage(float,float)), responseMeasurement, SLOT(input(float)));
+    QObject::connect (this, SIGNAL(yieldVoltage2(float,float)), responseMeasurement, SLOT(inputX(float)));
+    QObject::connect (this, SIGNAL(yieldVoltage(float,float)), responseMeasurement, SLOT(inputY(float)));
     QObject::connect (responseMeasurement, SIGNAL(startSignal()), this, SLOT(startVoltmeter()));
-    QObject::connect (recordSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(selectRecordingSource(int)));
+    QObject::connect (recordXSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(selectRecordingXSource(int)));
+    QObject::connect (recordYSelect, SIGNAL(currentIndexChanged(int)), this, SLOT(selectRecordingYSource(int)));
 
-    for(int i = 0;i < 6;++i){
-        recordSelect->addItem(select_voltage[i]);
+    for(int i = 0;i < VOLTAGE_LIST_SIZE;++i){
+        recordXSelect->addItem(select_voltage[i]);
+        recordYSelect->addItem(select_voltage[i]);
     }
-    recordIndex = 0;
+    recordXSelect->setCurrentIndex(VOLTAGE_LIST_SIZE-1);
+    recordXIndex = VOLTAGE_LIST_SIZE-1;
+    recordYIndex = 0;
 }
 
-void VoltmeterWidget::selectRecordingSource(int index){
-    if(index < 6 && index >= 0){
-        recordIndex = index;
+void VoltmeterWidget::selectRecordingXSource(int index){
+    if(index < VOLTAGE_LIST_SIZE && index >= 0){
+        recordXIndex = index;
+    }
+}
+
+void VoltmeterWidget::selectRecordingYSource(int index){
+    if(index < VOLTAGE_LIST_SIZE && index >= 0){
+        recordYIndex = index;
     }
 }
 
@@ -106,9 +125,8 @@ void VoltmeterWidget::displayData(){
     if(transfer){
         const uint16_t* rawData = (const uint16_t*)transfer->getData();
         int32_t *rawValue = (int32_t*)(rawData + 1);
-        /* TODO: check index */
 
-        float voltages[6];
+        float voltages[VOLTAGE_LIST_SIZE-1];
 
         int channels = (transfer->getSize() - 2) / 4;
 
@@ -147,7 +165,18 @@ void VoltmeterWidget::displayData(){
         }
         recordWidget->recordSubmit();
 
-        yieldVoltage(voltages[recordIndex], rawData[0] * 0.01f);
+        if(recordXIndex < (VOLTAGE_LIST_SIZE-1)){
+            yieldVoltage2(voltages[recordXIndex], rawData[0] * 0.01f);
+        }
+        else {
+            responseMeasurement->inputAsOutput(false);
+        }
+        if(recordYIndex < (VOLTAGE_LIST_SIZE-1)){
+            yieldVoltage(voltages[recordYIndex], rawData[0] * 0.01f);
+        }
+        else {
+            responseMeasurement->inputAsOutput(true);
+        }
     }
 }
 

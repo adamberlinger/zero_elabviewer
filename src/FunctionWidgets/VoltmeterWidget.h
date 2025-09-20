@@ -44,8 +44,10 @@ protected:
 
     QLabel* diffVoltageLabel1;
     QLabel* diffVoltageLabel2;
-    QComboBox* recordSelect;
-    int recordIndex;
+    QComboBox* recordXSelect;
+    QComboBox* recordYSelect;
+    int recordXIndex;
+    int recordYIndex;
 
     QPushButton* startButton;
     QPushButton* stopButton;
@@ -59,9 +61,11 @@ public slots:
     void stopVoltmeter();
     void displayData();
     void configureNumSamples(float value);
-    void selectRecordingSource(int index);
+    void selectRecordingXSource(int index);
+    void selectRecordingYSource(int index);
 signals:
     void yieldVoltage(float value,float time);
+    void yieldVoltage2(float value,float time);
 public:
     VoltmeterWidget(Protocol* protocol, int channel, DataConverter* adcConverter);
     void setGenerator(GeneratorWidget* generator);
